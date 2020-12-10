@@ -1,9 +1,10 @@
-from random import choice, sample
 import unittest
-from .utils import create_election_test_message
+from random import choice, sample
 from decidim.electionguard.bulletin_board import BulletinBoard
 from decidim.electionguard.trustee import Trustee
 from decidim.electionguard.voter import Voter
+from decidim.electionguard.utils import InvalidBallot
+from .utils import create_election_test_message, open_ballot_box_message, close_ballot_box_message
 
 
 NUMBER_OF_VOTERS = 10
@@ -71,19 +72,17 @@ class TestIntegration(unittest.TestCase):
             trustee.process_message('trustee_election_keys', public_keys)
             for public_keys in trustees_public_keys
             for trustee in self.trustees
-            if trustee.context.guardian_id != public_keys['owner_id']
         ]))
 
         self.checkpoint("PUBLIC KEYS", trustees_public_keys)
 
         for partial_public_keys in trustees_partial_public_keys:
-            self.bulletin_board.process_message('trustee_partial_election_key', partial_public_keys)
+            self.bulletin_board.process_message('trustee_partial_election_keys', partial_public_keys)
 
         trustees_verifications = list(filter(None, [
-            trustee.process_message('trustee_partial_election_key', partial_public_keys)
+            trustee.process_message('trustee_partial_election_keys', partial_public_keys)
             for partial_public_keys in trustees_partial_public_keys
             for trustee in self.trustees
-            if trustee.context.guardian_id != partial_public_keys['guardian_id']
         ]))
 
         self.checkpoint("PARTIAL PUBLIC KEYS", trustees_partial_public_keys)
@@ -93,8 +92,7 @@ class TestIntegration(unittest.TestCase):
 
         for verification in trustees_verifications:
             for trustee in self.trustees:
-                if trustee.context.guardian_id != verification['guardian_id']:
-                    trustee.process_message('trustee_verification', verification)
+                trustee.process_message('trustee_verification', verification)
 
         self.checkpoint("VERIFICATIONS", trustees_verifications)
 
@@ -117,6 +115,7 @@ class TestIntegration(unittest.TestCase):
         for voter in self.voters:
             voter.process_message('create_election', self.election_message)
             voter.process_message('joint_election_key', self.joint_election_key)
+            voter.process_message('open_ballot_box', open_ballot_box_message())
 
             ballot = dict(
                 (contest['object_id'], sample(contest['selections'], choice(contest['number'])))
@@ -127,24 +126,25 @@ class TestIntegration(unittest.TestCase):
         voter = Voter('a-voter')
         voter.process_message('create_election', self.election_message)
         voter.process_message('joint_election_key', self.joint_election_key)
+        voter.process_message('open_ballot_box', open_ballot_box_message())
         encrypted_ballot = voter.encrypt(ballot, True)
         self.encrypted_ballots.append(encrypted_ballot)
 
     def cast_votes(self):
-        self.bulletin_board.open_ballot_box()
+        self.bulletin_board.process_message('open_ballot_box', open_ballot_box_message())
         self.checkpoint("OPEN BALLOT BOX")
 
         self.accepted_ballots = []
 
         for encrypted_ballot in self.encrypted_ballots:
-            accepted = self.bulletin_board.process_message('cast_vote', encrypted_ballot)
-            if accepted:
+            try:
+                self.bulletin_board.process_message('cast_vote', encrypted_ballot)
                 self.accepted_ballots.append(encrypted_ballot)
                 self.checkpoint("BALLOT ACCEPTED " + encrypted_ballot["object_id"], encrypted_ballot)
-            else:
+            except InvalidBallot:
                 self.checkpoint("BALLOT REJECTED " + encrypted_ballot["object_id"])
 
-        self.bulletin_board.close_ballot_box()
+        self.bulletin_board.process_message('close_ballot_box', close_ballot_box_message())
         self.checkpoint("CLOSE BALLOT BOX")
 
     def decrypt_tally(self):
