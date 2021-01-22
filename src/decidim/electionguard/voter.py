@@ -3,7 +3,7 @@ from electionguard.encrypt import encrypt_ballot, selection_from
 from electionguard.group import ElementModQ, ElementModP
 from electionguard.utils import get_optional
 from typing import List
-from .common import Context, ElectionStep, Wrapper
+from .common import Context, ElectionStep, Wrapper, Content
 from .utils import MissingJointKey, serialize, deserialize_key
 
 
@@ -22,8 +22,8 @@ class ProcessCreateElection(ElectionStep):
 class ProcessJointElectionKey(ElectionStep):
     message_type = 'joint_election_key'
 
-    def process_message(self, message_type: str, message: dict, context: Context):
-        context.joint_key = deserialize_key(message['joint_election_key'])
+    def process_message(self, message_type: str, message: Content, context: Context):
+        context.joint_key = deserialize_key(message['content'])
         context.election_builder.set_public_key(get_optional(context.joint_key))
         context.election_metadata, context.election_context = get_optional(context.election_builder.build())
 

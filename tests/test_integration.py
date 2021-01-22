@@ -168,7 +168,7 @@ class TestIntegration(unittest.TestCase):
         self.checkpoint("RESULTS", results)
 
         if self.show_output:
-            for question_id, question in results.items():
+            for question_id, question in results['content'].items():
                 print(f'Question {question_id}:')
                 for selection_id, selection in question['selections'].items():
                     print(f'Option {selection_id}: ' + str(selection['tally']))
