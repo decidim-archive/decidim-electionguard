@@ -23,7 +23,7 @@ class ProcessJointElectionKey(ElectionStep):
     message_type = 'joint_election_key'
 
     def process_message(self, message_type: str, message: Content, context: Context):
-        context.joint_key = deserialize_key(message['content'])
+        context.joint_key = deserialize_key(message['content']['joint_key'])
         context.election_builder.set_public_key(get_optional(context.joint_key))
         context.election_metadata, context.election_context = get_optional(context.election_builder.build())
 
