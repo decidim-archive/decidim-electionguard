@@ -1,20 +1,19 @@
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Dict, List, NoReturn, Optional, Set, Literal, Union, overload, Any, Tuple
+from typing import Dict, List, NoReturn, Optional, Set, Literal, Union, Any, Tuple
 from electionguard.ballot import CiphertextBallot, from_ciphertext_ballot, BallotBoxState
 from electionguard.ballot_validator import ballot_is_valid_for_election
 from electionguard.decryption_share import CiphertextDecryptionSelection
 from electionguard.decrypt_with_shares import decrypt_selection_with_decryption_shares
 from electionguard.elgamal import elgamal_combine_public_keys
 from electionguard.group import ElementModP
-from electionguard.guardian import Guardian
-from electionguard.key_ceremony import ElectionPartialKeyBackup, ElectionPartialKeyVerification, PublicKeySet
+from electionguard.key_ceremony import ElectionPartialKeyVerification, PublicKeySet
 from electionguard.serializable import Serializable
-from electionguard.tally import CiphertextTally, CiphertextTallyContest, tally_ballot, PlaintextTallyContest, PlaintextTallySelection
+from electionguard.tally import CiphertextTally, tally_ballot, PlaintextTallyContest, PlaintextTallySelection
 from electionguard.types import CONTEST_ID, GUARDIAN_ID, SELECTION_ID
 from electionguard.utils import get_optional
-from .common import Content, Context, ElectionStep, Wrapper, Key
-from .utils import InvalidBallot, pair_with_object_id, serialize, deserialize, deserialize_key
+from .common import Content, Context, ElectionStep, Wrapper
+from .utils import InvalidBallot, pair_with_object_id, serialize, deserialize
 
 
 class BulletinBoardContext(Context):
@@ -47,7 +46,7 @@ class ProcessTrusteeElectionKeys(ElectionStep):
     def process_message(self, _message_type: Literal['trustee_election_keys'], message: Content, context: BulletinBoardContext) -> Tuple[None, Optional[ElectionStep]]:
         content = deserialize(message['content'], PublicKeySet)
         guardian_id = content.owner_id
-        guardian_public_key = deserialize_key(content.election_public_key)
+        guardian_public_key = content.election_public_key
         context.public_keys[guardian_id] = guardian_public_key
         # TO-DO: verify keys?
 
@@ -165,13 +164,13 @@ class ProcessTrusteeShare(ElectionStep):
             for question_id, question in share['contests'].items():
                 for selection_id, selection in question['selections'].items():
                     shares[selection_id][guardian_id] = (
-                      deserialize_key(share['public_key']),
+                      deserialize(share['public_key'], ElementModP),
                       deserialize(selection, CiphertextDecryptionSelection)
                     )
         return shares
 
 
-class BulletinBoard(Wrapper):
+class BulletinBoard(Wrapper[BulletinBoardContext]):
     def __init__(self) -> None:
         super().__init__(BulletinBoardContext(), ProcessCreateElection())
 
@@ -180,5 +179,5 @@ class BulletinBoard(Wrapper):
         # TODO: remove the dependency of multiprocessing
         tally_ballot(from_ciphertext_ballot(ciphertext_ballot, BallotBoxState.CAST), self.context.tally)
 
-    def get_tally_cast(self):
-        return serialize(self.context.tally.cast)
+    def get_tally_cast(self) -> Dict:
+        return self.context.tally.cast

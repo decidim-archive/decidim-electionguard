@@ -8,9 +8,9 @@ from electionguard.serializable import Serializable
 from electionguard.tally import CiphertextTallyContest
 from electionguard.types import CONTEST_ID, GUARDIAN_ID, SELECTION_ID
 from electionguard.utils import get_optional
-from typing import Dict, Set, List, Optional, Literal, Type, Tuple
+from typing import Dict, Set, List, Optional, Literal, Tuple, TypedDict
 from .common import Context, ElectionStep, Key, Wrapper, Content
-from .utils import pair_with_object_id, serialize, deserialize, deserialize_key
+from .utils import pair_with_object_id, serialize, deserialize
 
 class TrusteeContext(Context):
     guardian: Guardian
@@ -127,13 +127,15 @@ class ProcessTrusteeVerification(ElectionStep):
         else:
             return None, None
 
+class JointKey(Serializable):
+    joint_key: ElementModP
 
 class ProcessEndKeyCeremony(ElectionStep):
     message_type = 'end_key_ceremony'
 
     def process_message(self, message_type: Literal['end_key_ceremony'], message: Content, context: TrusteeContext) -> Tuple[None, ElectionStep]:
-        joint_key = deserialize_key(message['content']['joint_key'])
-        context.election_builder.set_public_key(get_optional(joint_key))
+        joint_key = deserialize(message['content'], JointKey)
+        context.election_builder.set_public_key(get_optional(joint_key.joint_key))
         context.election_metadata, context.election_context = get_optional(context.election_builder.build())
         # TODO: coefficient validation keys???
         # TODO: check joint key, without using private variables if possible
@@ -149,7 +151,7 @@ class TallyCast(Serializable):
 class ProcessTallyCast(ElectionStep):
     message_type = 'tally_cast'
 
-    def process_message(self, message_type: Literal['tally_cast'], message: Content, context: TrusteeContext) -> Content:
+    def process_message(self, message_type: Literal['tally_cast'], message: Content, context: TrusteeContext) -> Tuple[Content, None]:
         contests: Dict[CONTEST_ID, CiphertextDecryptionContest] = {}
 
         tally_cast: Dict[CONTEST_ID, CiphertextTallyContest] = deserialize(message['content'], Dict[CONTEST_ID, CiphertextTallyContest])
@@ -167,12 +169,13 @@ class ProcessTallyCast(ElectionStep):
             )
 
         return {
+            'message_type': 'trustee_share',
             'content': serialize(TallyCast(
                 guardian_id=context.guardian_id,
                 public_key=context.guardian.share_election_public_key().key,
                 contests=contests
             ))
-        }
+        }, None
 
 
 class Trustee(Wrapper[TrusteeContext]):

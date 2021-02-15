@@ -1,6 +1,6 @@
 import unittest
 from decidim.electionguard.bulletin_board import BulletinBoard
-from decidim.electionguard.utils import pair_with_object_id, serialize, deserialize, deserialize_key
+from decidim.electionguard.utils import serialize
 from .utils import create_election_test_message, trustees_public_keys
 
 
@@ -17,10 +17,10 @@ class TestBulletinBoard(unittest.TestCase):
             self.bulletin_board.process_message('trustee_election_keys', public_keys)
 
         for trustee in election_message['trustees']:
-            self.bulletin_board.process_message('trustee_partial_election_keys', {'content': {'guardian_id': trustee['name']}})
+            self.bulletin_board.process_message('trustee_partial_election_keys', {'content': serialize({'guardian_id': trustee['name']})})
 
         for trustee in election_message['trustees']:
-            msg = self.bulletin_board.process_message('trustee_verification', {'content': {'guardian_id': trustee['name']}})
+            msg = self.bulletin_board.process_message('trustee_verification', {'content': serialize({'guardian_id': trustee['name']})})
 
         assert msg['message_type'] == 'end_key_ceremony'
 

@@ -3,7 +3,7 @@ import unittest
 from electionguard.elgamal import elgamal_combine_public_keys
 from electionguard.key_ceremony import PublicKeySet
 from decidim.electionguard.trustee import Trustee, TrusteePartialKeys, Key
-from decidim.electionguard.utils import serialize, deserialize_key
+from decidim.electionguard.utils import serialize, deserialize_key, deserialize
 from decidim.electionguard.common import Content
 from .utils import create_election_test_message
 
@@ -55,7 +55,7 @@ class TestTrustee(unittest.TestCase):
         # Simulate the message from the Bulletin Board
         end_key_ceremony: Content = {'content': serialize({
             'joint_key': elgamal_combine_public_keys(
-                deserialize_key(public_key['content']['election_public_key'])
+                deserialize(public_key['content'], PublicKeySet).election_public_key
                 for public_key in trustees_public_keys
             )
         })}

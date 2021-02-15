@@ -1,5 +1,9 @@
 # flake8: noqa: E501
 
+from electionguard.ballot import CiphertextBallot
+from decidim.electionguard.utils import deserialize, serialize, serialize_as_dict
+
+
 def create_election_test_message():
     return {
         'scheme': {
@@ -72,7 +76,7 @@ def create_election_test_message():
 def trustees_public_keys():
     return [
         {
-            'content': {
+            'content': serialize({
                 'owner_id': 'alicia',
                 'sequence_order': 0,
                 'auxiliary_public_key': '-----BEGIN PUBLIC KEY-----\nMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA6HhvGDSiKTN+Osb7m+Gt\nAKFzr00lrkN5PWvZXcQxO27VGe/007fH3w7okKszJdv4Rsc5Cu+Xf4F4EQhN2H3q\n9YT4Rck7KpnHX7RaktV8yhJb7O7+O6wLt9/AzLbHkGYJlnIJMHpG6bbL300kGmhI\nSqHzNikSTqJytkrjjgL3nL7AQXq6DGOzpn7DfIBlnZq6vdWDgT0Eqwc7FxPFHyxM\nYUBl86EjhPpvonfAVWlk9Wp55dpeXbI2JsI1uaJliQcJF5bWJcx03QbEMcvs4HUT\nBbku/qSklfuHc96ebGBMgzM7Qyp5DY5HWSg2x+tF0v5j1+ZALKrJcQgnNj3IaTzc\nG3prvjaWbUwdJLBkRD7Fz112ZatS0K/kbf17OZW254wFXuHx3/DCl0r/XXI4PFeR\nWzfGFga6OKRd5dJxpwVbJ38+t53IQPA94OIn/4Ly8n1KtKawzXwFg6+p1ALUAw/Y\nJiwOBeoVrt/ChMvl+fLLH5TLNnhFkF2C9Is2dM+Q0wEc9sTkIYT9TOGfDrIvJOk9\nO0LIdj/ojB9aNkZB6A90m1QtpjYRpza+OG3uMNsjC4xd7w28vjs6EQPK+eKcPQ44\nA/xoJoAZ735k9qMYRz9RCK52TqdTwWFUfvg+Rrh9g9s0I7tNNcgxUSYFY51WWL1+\n9VxP6xd8EJVFheoyHc6P5isCAwEAAQ==\n-----END PUBLIC KEY-----\n',
@@ -85,9 +89,9 @@ def trustees_public_keys():
                     'response': 'puH3SmTJnSn4JL3uDM5exiB0mDa67vibiu3qkA8IbCM=',
                     'usage': 'SecretValue'
                 }
-            }
+            })
         }, {
-            'content': {
+            'content': serialize({
                 'owner_id': 'bob',
                 'sequence_order': 1,
                 'auxiliary_public_key': '-----BEGIN PUBLIC KEY-----\nMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAs14L9s38kkSVAB+uDJJP\nmRdIUACwYq/K9r/c/XJs5AnzMLMyxAASASz0c84Unyf5mEE3iE7N5zPw82fcmdh0\njDm+9vFTygEIm5qSE31ooVKilcg181vl2e4LsGO8oqXn0ZKUoOV1TVUSrjWOsuP8\nwQKyHr34Bw/c+wxvIbDsQa+9uFWXMWdkeAJNQqnGfq17oiVATIZmXfa/S8DMLoZm\noYLMyRv7Vb8TN4Q5mi7AnGocUL5V8nfZLm0970j8hDxlqK1mkxO+ZWwLuIO9NZhq\nATi3zdA4MKw7eiZXcj00EYHy48Nzt7n7l89xNM2eYdqJgoIy46SmoK5zHWwY3Fhf\nrW3DL3RRDL79FP2PaEx2olgb9IzGKmspCZMi43/PhQ39qmzyv8h979C1oD2qZnWT\nXyhpid1X4guUyegqlDQxG9KEhkt1FS3OPPkPewVPfqhCavBWDQaJaG8RgccBZ82z\nbcQuAVqEf9qPUUuTwpVbG5cxTvqV6pOstDc3dtEJxarHEEaY78iWq8K3tFpptlVA\n807YCfJPfZdp6qThBnkFcJROSAZSEa6sVcJyp4nOCk3Jyedcd76IpzeU7ueSRSho\nnyJsB9Eedtq2I7BsOolfngqe4pVaXorf5vcHkwpcNg0THYSvUuC4b6XEW8XqnT70\nMqKEUoA5ixoJ2pf9tXaVgYUCAwEAAQ==\n-----END PUBLIC KEY-----\n',
@@ -100,9 +104,9 @@ def trustees_public_keys():
                     'response': 'AQy+BIv++6QaVlDQNIpd45ZIarh/0weEaGTs8a4yJE8=',
                     'usage': 'SecretValue'
                 }
-            }
+            })
         }, {
-            'content': {
+            'content': serialize({
                 'owner_id': 'clara',
                 'sequence_order': 2,
                 'auxiliary_public_key': '-----BEGIN PUBLIC KEY-----\nMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAxxobWJQjHoxb0//JfPa7\nvHkvoN7a+42OBJIPsQPeJKt9nT1yO7fZLnG2y3Ky+XMIYgzQIOArmcKwBqr/SKfY\nW9wAVDjf85Wiky5qK+jArKOzxnlzIvQKVLyouAXiBglN7NBALlVYPmGKQXRrl8eT\nYHv/F+99wLY2rmAcjGKgex091giV1GK/nYJ4+PawrA+sq0nkEPllc3ZQpAbR7/qc\nINweUpU/3eNNzL1tlIARXY/SVrviNVcpOmo4EdOiwRNvXQyNXOoy7UvWrEtrlyYS\nmSN2kH/6+TC21BUn49QFXT27iWITYWrMfWszUrr24V1Q/FLJCUX6IyAjDc7fiVhP\n2qhIGqG6z97nlQX8vBDW/CFXJjZ8SeZa+p2JmoUaTsOC72kMKAZ9jmYOZmbhnXYp\nrddlctbgdaCkdcRD2tzAQQs5q+H3Rn9iOlk0TAry3p1NkmDx6oVlqW38rHkpS5cx\nyxOuwNzY8wdTUWElGWaYqAfyoDEeFpDae9qH9N82s6DpXIG5eWU+ErufCNhaLRw+\nGnDkKdQ68jQI7+kuP01kWmIargRSgyPemWJ8hMrpU9mXx8fWej81+qb0C/Q3xGWO\nPBGJ/WYs9P3uC0a2cWDzcwMAtLsbeOO7AVjz0LhWMECS0Eqm6/YdF3raq4ypix4E\nNEATk52lfROv+Ojnn45u5JcCAwEAAQ==\n-----END PUBLIC KEY-----\n',
@@ -115,26 +119,26 @@ def trustees_public_keys():
                     'response': '+rqEwVYM7oQoPJtI/kuIwnoWRqUoyRANbgv58j5vwc0=',
                     'usage': 'SecretValue'
                 }
-            }
+            })
     }
     ]
 
 
 def joint_election_key_test_message():
     return {
-        'content': '2UGb92M9jB1sa7AZ+FuwjXtdJ8dxYTyV3Aav21mpWGoHFzvFh8n16RDq+ges84g4kNN0MAzIV+UDvcUQLaEYD1ou7m+hBI+dZ6XgQooK9jSCXodrbl19M/ZEfjspyWzqECGSLuXoqpJtfCkzkEts73EROj3W46oDnlxL/2027pl25f1PmNLW4zhcP6ja4Ld9vUNQmlZwfqscdwDLsGxl/ybJV/46KmtylxY2A4bEcbiy9UZZay+PUsUJWjMx4h7Q45RIL2pB6nA8WtBZ3gYbXR6EVsXmFp+Lv8VuoHpNPF83UxmCGdzkZKKeOBR5oTzGvnhiMy0FAKlHnLFU0PRkdZaTKC07azQvE90ZR1NGcapQ7AFd2h+4xu+s2Wqmx/tHVYo9/Rgvl99mo9LD3qXrsfmH8j2F+KKCGl2PwGimEQE52GZZLx9jIe744Wpp72/FP7py7L9XeJ6soe67/n6sGt/B7qw4HpkhAIstsPPk2mVK1WP2s9CqqJWDh8Ks/LQVp33KvuNzvZ+FwQCfjN1vpNB8NyWL04/oP8BICw2GO0TixlsJoo5dXpLWD4AmAOOC0xD5Qj+tebrGcYl/BkmeUlPxWTn947L5uuThbLh82B3hgW19wHCrMA9E1v+pUtMB+0ioXZnw3okYKgyDxhmVekYdpRdtd9KpXVle+KOFdD0='
+        'content': serialize({'joint_key': '2UGb92M9jB1sa7AZ+FuwjXtdJ8dxYTyV3Aav21mpWGoHFzvFh8n16RDq+ges84g4kNN0MAzIV+UDvcUQLaEYD1ou7m+hBI+dZ6XgQooK9jSCXodrbl19M/ZEfjspyWzqECGSLuXoqpJtfCkzkEts73EROj3W46oDnlxL/2027pl25f1PmNLW4zhcP6ja4Ld9vUNQmlZwfqscdwDLsGxl/ybJV/46KmtylxY2A4bEcbiy9UZZay+PUsUJWjMx4h7Q45RIL2pB6nA8WtBZ3gYbXR6EVsXmFp+Lv8VuoHpNPF83UxmCGdzkZKKeOBR5oTzGvnhiMy0FAKlHnLFU0PRkdZaTKC07azQvE90ZR1NGcapQ7AFd2h+4xu+s2Wqmx/tHVYo9/Rgvl99mo9LD3qXrsfmH8j2F+KKCGl2PwGimEQE52GZZLx9jIe744Wpp72/FP7py7L9XeJ6soe67/n6sGt/B7qw4HpkhAIstsPPk2mVK1WP2s9CqqJWDh8Ks/LQVp33KvuNzvZ+FwQCfjN1vpNB8NyWL04/oP8BICw2GO0TixlsJoo5dXpLWD4AmAOOC0xD5Qj+tebrGcYl/BkmeUlPxWTn947L5uuThbLh82B3hgW19wHCrMA9E1v+pUtMB+0ioXZnw3okYKgyDxhmVekYdpRdtd9KpXVle+KOFdD0='})
     }
 
 
-def open_ballot_box_message():
+def start_vote_message():
     return {
-        'message_id': 'decidim-barcelona.1.open_ballot_box+a.decidim-barcelona'
+        'message_id': 'decidim-barcelona.1.start_vote+a.decidim-barcelona'
     }
 
 
-def close_ballot_box_message():
+def end_vote_message():
     return {
-        'message_id': 'decidim-barcelona.1.close_ballot_box+a.decidim-barcelona'
+        'message_id': 'decidim-barcelona.1.end_vote+a.decidim-barcelona'
     }
 
 
@@ -372,8 +376,9 @@ def deterministic_encrypted_ballot():
     }
 
 
-def remove_unused(ballot):
-    del ballot['timestamp']
-    del ballot['tracking_hash']
-    del ballot['previous_tracking_hash']
-    return ballot
+def remove_unused(ballot: str):
+    b = serialize_as_dict(deserialize(ballot, CiphertextBallot))
+    del b['timestamp']
+    del b['tracking_hash']
+    del b['previous_tracking_hash']
+    return b
