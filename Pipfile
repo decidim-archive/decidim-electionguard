@@ -5,9 +5,10 @@ verify_ssl = true
 
 [dev-packages]
 flake8 = ">=3.8.3"
+pytest = "*"
 
 [packages]
-electionguard = '==1.1.10'
+electionguard = '==1.1.15'
 jsons = '==1.2'
 
 [requires]

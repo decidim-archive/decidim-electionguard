@@ -1,3 +1,4 @@
+from typing import TypeVar, Type
 from electionguard.group import ElementModP
 from electionguard.serializable import write_json_object, read_json_object
 from .serializable import monkey_patch_serialization
@@ -9,12 +10,13 @@ monkey_patch_serialization()
 def serialize(obj, include_private: bool = False):
     return write_json_object(obj, not include_private)
 
+T = TypeVar("T")
 
-def deserialize(obj, type):
+def deserialize(obj: object, type: Type[T]) -> T:
     return read_json_object(obj, type)
 
 
-def deserialize_key(obj):
+def deserialize_key(obj: object) -> ElementModP:
     return read_json_object(obj, ElementModP)
 
 

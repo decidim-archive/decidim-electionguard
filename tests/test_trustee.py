@@ -1,7 +1,10 @@
+from typing import List, Optional
 import unittest
 from electionguard.elgamal import elgamal_combine_public_keys
-from decidim.electionguard.trustee import Trustee
+from electionguard.key_ceremony import PublicKeySet
+from decidim.electionguard.trustee import Trustee, TrusteePartialKeys, Key
 from decidim.electionguard.utils import serialize, deserialize_key
+from decidim.electionguard.common import Content
 from .utils import create_election_test_message
 
 
@@ -10,8 +13,13 @@ class TestTrustee(unittest.TestCase):
         self.trustees = [Trustee('alicia'), Trustee('bob'), Trustee('clara')]
 
     def test_key_ceremony(self):
-        trustees_public_keys = [
+        for trustee in self.trustees:
+            assert trustee.is_fresh()
+            assert not trustee.is_key_ceremony_done()
             trustee.process_message('create_election', create_election_test_message())
+
+        trustees_public_keys: List[Content] = [
+            trustee.process_message('start_key_ceremony', None)
             for trustee in self.trustees
         ]
 
@@ -45,15 +53,18 @@ class TestTrustee(unittest.TestCase):
                 trustee.process_message('trustee_verification', verification)
 
         # Simulate the message from the Bulletin Board
-        joint_election_key = serialize({
-            'joint_election_key': elgamal_combine_public_keys(
-                deserialize_key(public_keys['election_public_key'])
-                for public_keys in trustees_public_keys
+        end_key_ceremony: Content = {'content': serialize({
+            'joint_key': elgamal_combine_public_keys(
+                deserialize_key(public_key['content']['election_public_key'])
+                for public_key in trustees_public_keys
             )
-        })
+        })}
 
         for trustee in self.trustees:
-            print(repr(trustee.process_message('joint_election_key', joint_election_key)))
+            print(repr(trustee.process_message('end_key_ceremony', end_key_ceremony)))
+            
+        for trustee in self.trustees:
+            assert trustee.is_key_ceremony_done()
 
         # TODO: assert ballot keys
         # TODO: assert ballot constests keys

@@ -1,5 +1,9 @@
+from dataclasses import dataclass
 from electionguard.election import CiphertextElectionContext, ElectionDescription, InternalElectionDescription
 from electionguard.election_builder import ElectionBuilder
+from electionguard.group import ElementModP
+from electionguard.serializable import Serializable
+from typing import Generic, NewType, TypeVar, TypedDict, Type
 from .utils import complete_election_description, InvalidElectionDescription
 try:
     import cPickle as pickle
@@ -26,47 +30,63 @@ class Context:
         self.election_builder = ElectionBuilder(self.number_of_guardians, self.quorum, self.election)
 
 
-class ElectionStep:
+Key = NewType('Key', ElementModP)
+
+C = TypeVar('C', bound=Context)
+
+@dataclass
+class Content(TypedDict):
+    content: object
+
+class ElectionStep(Generic[C]):
     message_type: str
 
     def __init__(self) -> None:
-        self.next_step = None
         self.setup()
 
     def setup(self):
         pass
 
-    def skip_message(self, message_type: str):
+    def skip_message(self, message_type: str) -> bool:
         return self.message_type != message_type
 
-    def process_message(self, message_type: str, message: dict, context: Context):
+    def process_message(self, message_type: str, message: Content, context: C) -> Content:
         raise NotImplementedError()
 
 
-class Wrapper:
-    context: Context
-    step: ElectionStep
+class Wrapper(Generic[C]):
+    context: C
+    step: ElectionStep[C]
 
-    def __init__(self, context: Context, step: ElectionStep) -> None:
+    def __init__(self, context: C, step: ElectionStep[C]) -> None:
         self.context = context
         self.step = step
 
     def skip_message(self, message_type: str) -> bool:
         return self.step.skip_message(message_type)
 
-    def process_message(self, message_type: str, message: dict) -> dict:
+    def process_message(self, message_type: str, message: Content) -> Content:
         if self.step.skip_message(message_type):
             return
 
-        result = self.step.process_message(message_type, message, self.context)
+        result, next_step = self.step.process_message(message_type, message, self.context)
 
-        if self.step.next_step:
-            self.step = self.step.next_step
+        if next_step:
+            self.step = next_step
 
         return result
 
-    def backup(self) -> dict:
+    def is_fresh(self) -> bool:
+        return isinstance(self.step, self.starting_step)
+
+    def is_key_ceremony_done(self) -> bool:
+        raise NotImplementedError
+
+    def is_tally_done(self) -> bool:
+        raise NotImplementedError
+
+    def backup(self) -> str:
         return pickle.dumps(self)
 
-    def restore(backup: dict):
+    def restore(backup: str): # returns an instance of myself
         return pickle.loads(backup)
