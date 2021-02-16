@@ -1,8 +1,6 @@
-from dataclasses import dataclass
 from electionguard.ballot import PlaintextBallot, PlaintextBallotContest, PlaintextBallotSelection
 from electionguard.encrypt import encrypt_ballot, selection_from
 from electionguard.group import ElementModQ, ElementModP
-from electionguard.serializable import Serializable
 from electionguard.utils import get_optional
 from typing import List, Tuple
 
@@ -28,6 +26,10 @@ class ProcessEndKeyCeremony(ElectionStep):
 
     def process_message(self, message_type: str, message: Content, context: VoterContext) -> Tuple[None, None]:
         context.joint_key = deserialize(message['content'], JointElectionKey).joint_key
+        context.election_builder.set_public_key(
+            get_optional(context.joint_key))
+        context.election_metadata, context.election_context = get_optional(
+            context.election_builder.build())
         return None, None
 
 
@@ -47,13 +49,16 @@ class Voter(Wrapper[VoterContext]):
 
         for contest in self.context.election_metadata.get_contests_for(ballot_style):
             selections: List[PlaintextBallotSelection] = [
-                selection_from(selection, False, selection.object_id in ballot[contest.object_id])
+                selection_from(
+                    selection, False, selection.object_id in ballot[contest.object_id])
                 for selection in contest.ballot_selections
             ]
 
-            contests.append(PlaintextBallotContest(contest.object_id, selections))
+            contests.append(PlaintextBallotContest(
+                contest.object_id, selections))
 
-        plaintext_ballot = PlaintextBallot(self.ballot_id, ballot_style, contests)
+        plaintext_ballot = PlaintextBallot(
+            self.ballot_id, ballot_style, contests)
 
         # TODO: store the audit information somewhere
 
