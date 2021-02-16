@@ -8,8 +8,7 @@ from electionguard.serializable import Serializable
 from electionguard.tally import CiphertextTallyContest
 from electionguard.types import CONTEST_ID, GUARDIAN_ID, SELECTION_ID
 from electionguard.utils import get_optional
-from typing import Dict, Set, List, Optional, Literal, Tuple, TypedDict
-from .common import Context, ElectionStep, Key, Wrapper, Content
+from .messages import TrusteePartialKeys, TrusteeVerification, JointElectionKey, TrusteeShare
 from .utils import pair_with_object_id, serialize, deserialize
 
 class TrusteeContext(Context):
@@ -39,12 +38,9 @@ class ProcessStartKeyCeremony(ElectionStep):
     message_type = 'start_key_ceremony'
 
     def process_message(self, message_type: Literal['start_key_ceremony'], _message: Content, context: TrusteeContext) -> Tuple[Content, ElectionStep]:
-        return {'message_type': 'trustee_election_keys', 'content': serialize(context.guardian.share_public_keys())}, ProcessTrusteeElectionKeys()
+        return {'message_type': 'trustee_election_keys',
+                'content': serialize(context.guardian.share_public_keys())}, ProcessTrusteeElectionKeys()
 
-@dataclass
-class TrusteePartialKeys(Serializable):
-    guardian_id: GUARDIAN_ID
-    partial_keys: List[ElectionPartialKeyBackup]
 
 class ProcessTrusteeElectionKeys(ElectionStep):
     message_type = 'trustee_election_keys'
@@ -73,10 +69,6 @@ class ProcessTrusteeElectionKeys(ElectionStep):
         else:
             return None, None
 
-@dataclass
-class TrusteeVerification(Serializable):
-    guardian_id: GUARDIAN_ID
-    verifications: List[ElectionPartialKeyVerification]
 
 class ProcessTrusteePartialElectionKeys(ElectionStep):
     message_type = 'trustee_partial_election_keys'
@@ -127,14 +119,12 @@ class ProcessTrusteeVerification(ElectionStep):
         else:
             return None, None
 
-class JointKey(Serializable):
-    joint_key: ElementModP
 
 class ProcessEndKeyCeremony(ElectionStep):
     message_type = 'end_key_ceremony'
 
     def process_message(self, message_type: Literal['end_key_ceremony'], message: Content, context: TrusteeContext) -> Tuple[None, ElectionStep]:
-        joint_key = deserialize(message['content'], JointKey)
+        joint_key = deserialize(message['content'], JointElectionKey)
         context.election_builder.set_public_key(get_optional(joint_key.joint_key))
         context.election_metadata, context.election_context = get_optional(context.election_builder.build())
         # TODO: coefficient validation keys???
@@ -142,11 +132,6 @@ class ProcessEndKeyCeremony(ElectionStep):
         #         serialize(elgamal_combine_public_keys(context.guardian._guardian_election_public_keys.values()))
         return None, ProcessTallyCast()
 
-@dataclass
-class TallyCast(Serializable):
-    guardian_id: GUARDIAN_ID
-    public_key: Key
-    contests: Dict[CONTEST_ID, CiphertextDecryptionContest] 
 
 class ProcessTallyCast(ElectionStep):
     message_type = 'tally_cast'
@@ -170,7 +155,7 @@ class ProcessTallyCast(ElectionStep):
 
         return {
             'message_type': 'trustee_share',
-            'content': serialize(TallyCast(
+            'content': serialize(TrusteeShare(
                 guardian_id=context.guardian_id,
                 public_key=context.guardian.share_election_public_key().key,
                 contests=contests

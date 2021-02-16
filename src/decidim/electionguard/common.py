@@ -30,7 +30,6 @@ class Context:
         self.election_builder = ElectionBuilder(self.number_of_guardians, self.quorum, self.election)
 
 
-Key = NewType('Key', ElementModP)
 
 C = TypeVar('C', bound=Context)
 
