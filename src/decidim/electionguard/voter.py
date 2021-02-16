@@ -2,9 +2,11 @@ from electionguard.ballot import PlaintextBallot, PlaintextBallotContest, Plaint
 from electionguard.encrypt import encrypt_ballot, selection_from
 from electionguard.group import ElementModQ, ElementModP
 from electionguard.utils import get_optional
-from typing import List
+from typing import List, Tuple
+
 from .common import Context, ElectionStep, Wrapper, Content
-from .utils import MissingJointKey, serialize, deserialize_key
+from .messages import JointElectionKey
+from .utils import MissingJointKey, deserialize, serialize
 
 
 class VoterContext(Context):
@@ -14,21 +16,24 @@ class VoterContext(Context):
 class ProcessCreateElection(ElectionStep):
     message_type = 'create_election'
 
-    def process_message(self, message_type: str, message: dict, context: Context):
+    def process_message(self, message_type: str, message: dict, context: VoterContext) -> Tuple[None, ElectionStep]:
         context.build_election(message)
-        self.next_step = ProcessJointElectionKey()
+        return None, ProcessEndKeyCeremony()
 
 
-class ProcessJointElectionKey(ElectionStep):
-    message_type = 'joint_election_key'
+class ProcessEndKeyCeremony(ElectionStep):
+    message_type = 'end_key_ceremony'
 
-    def process_message(self, message_type: str, message: Content, context: Context):
-        context.joint_key = deserialize_key(message['content']['joint_key'])
-        context.election_builder.set_public_key(get_optional(context.joint_key))
-        context.election_metadata, context.election_context = get_optional(context.election_builder.build())
+    def process_message(self, message_type: str, message: Content, context: VoterContext) -> Tuple[None, None]:
+        context.joint_key = deserialize(message['content'], JointElectionKey).joint_key
+        context.election_builder.set_public_key(
+            get_optional(context.joint_key))
+        context.election_metadata, context.election_context = get_optional(
+            context.election_builder.build())
+        return None, None
 
 
-class Voter(Wrapper):
+class Voter(Wrapper[VoterContext]):
     ballot_id: str
 
     def __init__(self, ballot_id: str) -> None:
@@ -44,13 +49,16 @@ class Voter(Wrapper):
 
         for contest in self.context.election_metadata.get_contests_for(ballot_style):
             selections: List[PlaintextBallotSelection] = [
-                selection_from(selection, False, selection.object_id in ballot[contest.object_id])
+                selection_from(
+                    selection, False, selection.object_id in ballot[contest.object_id])
                 for selection in contest.ballot_selections
             ]
 
-            contests.append(PlaintextBallotContest(contest.object_id, selections))
+            contests.append(PlaintextBallotContest(
+                contest.object_id, selections))
 
-        plaintext_ballot = PlaintextBallot(self.ballot_id, ballot_style, contests)
+        plaintext_ballot = PlaintextBallot(
+            self.ballot_id, ballot_style, contests)
 
         # TODO: store the audit information somewhere
 
@@ -62,5 +70,6 @@ class Voter(Wrapper):
             self.context.joint_key if deterministic else None,
             True
         ))
+        # TODO: return both auditable and encrypted ballot
 
         return encrypted_ballot

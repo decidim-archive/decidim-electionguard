@@ -1,9 +1,9 @@
-from typing import List, Optional
+from typing import List
 import unittest
 from electionguard.elgamal import elgamal_combine_public_keys
 from electionguard.key_ceremony import PublicKeySet
-from decidim.electionguard.trustee import Trustee, TrusteePartialKeys, Key
-from decidim.electionguard.utils import serialize, deserialize_key
+from decidim.electionguard.trustee import Trustee
+from decidim.electionguard.utils import serialize, deserialize
 from decidim.electionguard.common import Content
 from .utils import create_election_test_message
 
@@ -16,7 +16,8 @@ class TestTrustee(unittest.TestCase):
         for trustee in self.trustees:
             assert trustee.is_fresh()
             assert not trustee.is_key_ceremony_done()
-            trustee.process_message('create_election', create_election_test_message())
+            trustee.process_message(
+                'create_election', create_election_test_message())
 
         trustees_public_keys: List[Content] = [
             trustee.process_message('start_key_ceremony', None)
@@ -38,7 +39,8 @@ class TestTrustee(unittest.TestCase):
         print('---- END PARTIAL PUBLIC KEYS ----\n')
 
         trustees_verifications = list(filter(None, [
-            trustee.process_message('trustee_partial_election_keys', partial_public_keys)
+            trustee.process_message(
+                'trustee_partial_election_keys', partial_public_keys)
             for partial_public_keys in trustees_partial_public_keys
             for trustee in self.trustees
         ]))
@@ -55,14 +57,16 @@ class TestTrustee(unittest.TestCase):
         # Simulate the message from the Bulletin Board
         end_key_ceremony: Content = {'content': serialize({
             'joint_key': elgamal_combine_public_keys(
-                deserialize_key(public_key['content']['election_public_key'])
+                deserialize(public_key['content'],
+                            PublicKeySet).election_public_key
                 for public_key in trustees_public_keys
             )
         })}
 
         for trustee in self.trustees:
-            print(repr(trustee.process_message('end_key_ceremony', end_key_ceremony)))
-            
+            print(repr(trustee.process_message(
+                'end_key_ceremony', end_key_ceremony)))
+
         for trustee in self.trustees:
             assert trustee.is_key_ceremony_done()
 

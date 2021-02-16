@@ -1,9 +1,7 @@
 from dataclasses import dataclass
 from electionguard.election import CiphertextElectionContext, ElectionDescription, InternalElectionDescription
 from electionguard.election_builder import ElectionBuilder
-from electionguard.group import ElementModP
-from electionguard.serializable import Serializable
-from typing import Generic, NewType, TypeVar, TypedDict, Type
+from typing import Generic, TypeVar, TypedDict
 from .utils import complete_election_description, InvalidElectionDescription
 try:
     import cPickle as pickle
@@ -20,23 +18,25 @@ class Context:
     quorum: int
 
     def build_election(self, election_creation: dict):
-        self.election = ElectionDescription.from_json_object(complete_election_description(election_creation['description']))
+        self.election = ElectionDescription.from_json_object(
+            complete_election_description(election_creation['description']))
 
         if not self.election.is_valid():
             raise InvalidElectionDescription()
 
         self.number_of_guardians = len(election_creation['trustees'])
         self.quorum = election_creation['scheme']['parameters']['quorum']
-        self.election_builder = ElectionBuilder(self.number_of_guardians, self.quorum, self.election)
+        self.election_builder = ElectionBuilder(
+            self.number_of_guardians, self.quorum, self.election)
 
-
-Key = NewType('Key', ElementModP)
 
 C = TypeVar('C', bound=Context)
+
 
 @dataclass
 class Content(TypedDict):
     content: object
+
 
 class ElectionStep(Generic[C]):
     message_type: str
@@ -69,7 +69,8 @@ class Wrapper(Generic[C]):
         if self.step.skip_message(message_type):
             return
 
-        result, next_step = self.step.process_message(message_type, message, self.context)
+        result, next_step = self.step.process_message(
+            message_type, message, self.context)
 
         if next_step:
             self.step = next_step
@@ -88,5 +89,5 @@ class Wrapper(Generic[C]):
     def backup(self) -> str:
         return pickle.dumps(self)
 
-    def restore(backup: str): # returns an instance of myself
+    def restore(backup: str):  # returns an instance of myself
         return pickle.loads(backup)

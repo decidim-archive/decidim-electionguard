@@ -10,12 +10,14 @@ old_set_deserializers = electionguard.serializable.set_deserializers
 def monkey_patch_serialization():
     electionguard.serializable.set_serializers = set_serializers
     electionguard.serializable.set_deserializers = set_deserializers
-    electionguard.serializable.KEYS_TO_REMOVE += ['nonce']  # Remove nonces when serializing to JSON
+    # Remove nonces when serializing to JSON
+    electionguard.serializable.KEYS_TO_REMOVE += ['nonce']
 
 
 # patch from https://github.com/microsoft/electionguard-python/pull/154
 
 ENCODE_THRESHOLD: Final[int] = 100_000_000
+
 
 def int_to_maybe_base64(i: int) -> Union[str, int]:
     """
@@ -52,19 +54,27 @@ def maybe_base64_to_int(i: Union[str, int]) -> int:
     b = b64decode(i)
     return int.from_bytes(b, byteorder="big", signed=False)
 
+
 def set_serializers():
     old_set_serializers()
-    electionguard.serializable.set_serializer(lambda p, **_: int_to_maybe_base64(p.to_int()), ElementModP)
-    electionguard.serializable.set_serializer(lambda q, **_: int_to_maybe_base64(q.to_int()), ElementModQ)
-    electionguard.serializable.set_serializer(lambda i, **_: int_to_maybe_base64(i), int)
+    electionguard.serializable.set_serializer(
+        lambda p, **_: int_to_maybe_base64(p.to_int()), ElementModP)
+    electionguard.serializable.set_serializer(
+        lambda q, **_: int_to_maybe_base64(q.to_int()), ElementModQ)
+    electionguard.serializable.set_serializer(
+        lambda i, **_: int_to_maybe_base64(i), int)
+
 
 def set_deserializers():
     old_set_serializers()
     electionguard.serializable.set_deserializer(
-        lambda p, cls, **_: int_to_p_unchecked(maybe_base64_to_int(p)), ElementModP
+        lambda p, cls, **_: int_to_p_unchecked(
+            maybe_base64_to_int(p)), ElementModP
     )
     electionguard.serializable.set_deserializer(
-        lambda q, cls, **_: int_to_q_unchecked(maybe_base64_to_int(q)), ElementModQ
+        lambda q, cls, **_: int_to_q_unchecked(
+            maybe_base64_to_int(q)), ElementModQ
     )
 
-    electionguard.serializable.set_deserializer(lambda i, cls, **_: maybe_base64_to_int(i), int)
+    electionguard.serializable.set_deserializer(
+        lambda i, cls, **_: maybe_base64_to_int(i), int)

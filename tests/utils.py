@@ -1,5 +1,9 @@
 # flake8: noqa: E501
 
+from electionguard.ballot import CiphertextBallot
+from decidim.electionguard.utils import deserialize, serialize, serialize_as_dict
+
+
 def create_election_test_message():
     return {
         'scheme': {
@@ -72,7 +76,7 @@ def create_election_test_message():
 def trustees_public_keys():
     return [
         {
-            'content': {
+            'content': serialize({
                 'owner_id': 'alicia',
                 'sequence_order': 0,
                 'auxiliary_public_key': '-----BEGIN PUBLIC KEY-----\nMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA6HhvGDSiKTN+Osb7m+Gt\nAKFzr00lrkN5PWvZXcQxO27VGe/007fH3w7okKszJdv4Rsc5Cu+Xf4F4EQhN2H3q\n9YT4Rck7KpnHX7RaktV8yhJb7O7+O6wLt9/AzLbHkGYJlnIJMHpG6bbL300kGmhI\nSqHzNikSTqJytkrjjgL3nL7AQXq6DGOzpn7DfIBlnZq6vdWDgT0Eqwc7FxPFHyxM\nYUBl86EjhPpvonfAVWlk9Wp55dpeXbI2JsI1uaJliQcJF5bWJcx03QbEMcvs4HUT\nBbku/qSklfuHc96ebGBMgzM7Qyp5DY5HWSg2x+tF0v5j1+ZALKrJcQgnNj3IaTzc\nG3prvjaWbUwdJLBkRD7Fz112ZatS0K/kbf17OZW254wFXuHx3/DCl0r/XXI4PFeR\nWzfGFga6OKRd5dJxpwVbJ38+t53IQPA94OIn/4Ly8n1KtKawzXwFg6+p1ALUAw/Y\nJiwOBeoVrt/ChMvl+fLLH5TLNnhFkF2C9Is2dM+Q0wEc9sTkIYT9TOGfDrIvJOk9\nO0LIdj/ojB9aNkZB6A90m1QtpjYRpza+OG3uMNsjC4xd7w28vjs6EQPK+eKcPQ44\nA/xoJoAZ735k9qMYRz9RCK52TqdTwWFUfvg+Rrh9g9s0I7tNNcgxUSYFY51WWL1+\n9VxP6xd8EJVFheoyHc6P5isCAwEAAQ==\n-----END PUBLIC KEY-----\n',
@@ -85,9 +89,9 @@ def trustees_public_keys():
                     'response': 'puH3SmTJnSn4JL3uDM5exiB0mDa67vibiu3qkA8IbCM=',
                     'usage': 'SecretValue'
                 }
-            }
+            })
         }, {
-            'content': {
+            'content': serialize({
                 'owner_id': 'bob',
                 'sequence_order': 1,
                 'auxiliary_public_key': '-----BEGIN PUBLIC KEY-----\nMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAs14L9s38kkSVAB+uDJJP\nmRdIUACwYq/K9r/c/XJs5AnzMLMyxAASASz0c84Unyf5mEE3iE7N5zPw82fcmdh0\njDm+9vFTygEIm5qSE31ooVKilcg181vl2e4LsGO8oqXn0ZKUoOV1TVUSrjWOsuP8\nwQKyHr34Bw/c+wxvIbDsQa+9uFWXMWdkeAJNQqnGfq17oiVATIZmXfa/S8DMLoZm\noYLMyRv7Vb8TN4Q5mi7AnGocUL5V8nfZLm0970j8hDxlqK1mkxO+ZWwLuIO9NZhq\nATi3zdA4MKw7eiZXcj00EYHy48Nzt7n7l89xNM2eYdqJgoIy46SmoK5zHWwY3Fhf\nrW3DL3RRDL79FP2PaEx2olgb9IzGKmspCZMi43/PhQ39qmzyv8h979C1oD2qZnWT\nXyhpid1X4guUyegqlDQxG9KEhkt1FS3OPPkPewVPfqhCavBWDQaJaG8RgccBZ82z\nbcQuAVqEf9qPUUuTwpVbG5cxTvqV6pOstDc3dtEJxarHEEaY78iWq8K3tFpptlVA\n807YCfJPfZdp6qThBnkFcJROSAZSEa6sVcJyp4nOCk3Jyedcd76IpzeU7ueSRSho\nnyJsB9Eedtq2I7BsOolfngqe4pVaXorf5vcHkwpcNg0THYSvUuC4b6XEW8XqnT70\nMqKEUoA5ixoJ2pf9tXaVgYUCAwEAAQ==\n-----END PUBLIC KEY-----\n',
@@ -100,9 +104,9 @@ def trustees_public_keys():
                     'response': 'AQy+BIv++6QaVlDQNIpd45ZIarh/0weEaGTs8a4yJE8=',
                     'usage': 'SecretValue'
                 }
-            }
+            })
         }, {
-            'content': {
+            'content': serialize({
                 'owner_id': 'clara',
                 'sequence_order': 2,
                 'auxiliary_public_key': '-----BEGIN PUBLIC KEY-----\nMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAxxobWJQjHoxb0//JfPa7\nvHkvoN7a+42OBJIPsQPeJKt9nT1yO7fZLnG2y3Ky+XMIYgzQIOArmcKwBqr/SKfY\nW9wAVDjf85Wiky5qK+jArKOzxnlzIvQKVLyouAXiBglN7NBALlVYPmGKQXRrl8eT\nYHv/F+99wLY2rmAcjGKgex091giV1GK/nYJ4+PawrA+sq0nkEPllc3ZQpAbR7/qc\nINweUpU/3eNNzL1tlIARXY/SVrviNVcpOmo4EdOiwRNvXQyNXOoy7UvWrEtrlyYS\nmSN2kH/6+TC21BUn49QFXT27iWITYWrMfWszUrr24V1Q/FLJCUX6IyAjDc7fiVhP\n2qhIGqG6z97nlQX8vBDW/CFXJjZ8SeZa+p2JmoUaTsOC72kMKAZ9jmYOZmbhnXYp\nrddlctbgdaCkdcRD2tzAQQs5q+H3Rn9iOlk0TAry3p1NkmDx6oVlqW38rHkpS5cx\nyxOuwNzY8wdTUWElGWaYqAfyoDEeFpDae9qH9N82s6DpXIG5eWU+ErufCNhaLRw+\nGnDkKdQ68jQI7+kuP01kWmIargRSgyPemWJ8hMrpU9mXx8fWej81+qb0C/Q3xGWO\nPBGJ/WYs9P3uC0a2cWDzcwMAtLsbeOO7AVjz0LhWMECS0Eqm6/YdF3raq4ypix4E\nNEATk52lfROv+Ojnn45u5JcCAwEAAQ==\n-----END PUBLIC KEY-----\n',
@@ -115,26 +119,28 @@ def trustees_public_keys():
                     'response': '+rqEwVYM7oQoPJtI/kuIwnoWRqUoyRANbgv58j5vwc0=',
                     'usage': 'SecretValue'
                 }
-            }
-    }
+            })
+        }
     ]
 
 
 def joint_election_key_test_message():
     return {
-        'content': '2UGb92M9jB1sa7AZ+FuwjXtdJ8dxYTyV3Aav21mpWGoHFzvFh8n16RDq+ges84g4kNN0MAzIV+UDvcUQLaEYD1ou7m+hBI+dZ6XgQooK9jSCXodrbl19M/ZEfjspyWzqECGSLuXoqpJtfCkzkEts73EROj3W46oDnlxL/2027pl25f1PmNLW4zhcP6ja4Ld9vUNQmlZwfqscdwDLsGxl/ybJV/46KmtylxY2A4bEcbiy9UZZay+PUsUJWjMx4h7Q45RIL2pB6nA8WtBZ3gYbXR6EVsXmFp+Lv8VuoHpNPF83UxmCGdzkZKKeOBR5oTzGvnhiMy0FAKlHnLFU0PRkdZaTKC07azQvE90ZR1NGcapQ7AFd2h+4xu+s2Wqmx/tHVYo9/Rgvl99mo9LD3qXrsfmH8j2F+KKCGl2PwGimEQE52GZZLx9jIe744Wpp72/FP7py7L9XeJ6soe67/n6sGt/B7qw4HpkhAIstsPPk2mVK1WP2s9CqqJWDh8Ks/LQVp33KvuNzvZ+FwQCfjN1vpNB8NyWL04/oP8BICw2GO0TixlsJoo5dXpLWD4AmAOOC0xD5Qj+tebrGcYl/BkmeUlPxWTn947L5uuThbLh82B3hgW19wHCrMA9E1v+pUtMB+0ioXZnw3okYKgyDxhmVekYdpRdtd9KpXVle+KOFdD0='
+        'content': serialize({
+            'joint_key': '2UGb92M9jB1sa7AZ+FuwjXtdJ8dxYTyV3Aav21mpWGoHFzvFh8n16RDq+ges84g4kNN0MAzIV+UDvcUQLaEYD1ou7m+hBI+dZ6XgQooK9jSCXodrbl19M/ZEfjspyWzqECGSLuXoqpJtfCkzkEts73EROj3W46oDnlxL/2027pl25f1PmNLW4zhcP6ja4Ld9vUNQmlZwfqscdwDLsGxl/ybJV/46KmtylxY2A4bEcbiy9UZZay+PUsUJWjMx4h7Q45RIL2pB6nA8WtBZ3gYbXR6EVsXmFp+Lv8VuoHpNPF83UxmCGdzkZKKeOBR5oTzGvnhiMy0FAKlHnLFU0PRkdZaTKC07azQvE90ZR1NGcapQ7AFd2h+4xu+s2Wqmx/tHVYo9/Rgvl99mo9LD3qXrsfmH8j2F+KKCGl2PwGimEQE52GZZLx9jIe744Wpp72/FP7py7L9XeJ6soe67/n6sGt/B7qw4HpkhAIstsPPk2mVK1WP2s9CqqJWDh8Ks/LQVp33KvuNzvZ+FwQCfjN1vpNB8NyWL04/oP8BICw2GO0TixlsJoo5dXpLWD4AmAOOC0xD5Qj+tebrGcYl/BkmeUlPxWTn947L5uuThbLh82B3hgW19wHCrMA9E1v+pUtMB+0ioXZnw3okYKgyDxhmVekYdpRdtd9KpXVle+KOFdD0='
+        })
     }
 
 
-def open_ballot_box_message():
+def start_vote_message():
     return {
-        'message_id': 'decidim-barcelona.1.open_ballot_box+a.decidim-barcelona'
+        'message_id': 'decidim-barcelona.1.start_vote+a.decidim-barcelona'
     }
 
 
-def close_ballot_box_message():
+def end_vote_message():
     return {
-        'message_id': 'decidim-barcelona.1.close_ballot_box+a.decidim-barcelona'
+        'message_id': 'decidim-barcelona.1.end_vote+a.decidim-barcelona'
     }
 
 
@@ -162,8 +168,8 @@ def deterministic_encrypted_ballot():
                     'proof_zero_pad': 'b3s1aTlBIIpj3pqWTVCwgcK+6DRATgy36732pQW2DObH5u4gawC8QF9BSHDD0agra64s2UDVAMLc8MVVhbb/QGMPXqNp6zCXEPyz1bE2xH7Ju0YM+eMsjck98F6SboQo8QjRYLxgXERxNiJVG8fq4uGc4000XWcjAJG9HSHWJdLGEa2OL26biqUPx3c1ui66XRXYo1K0WyfCO5tPX0jv2RyrW+XY6s7RXsH+uWvFS6eHRTkdW4n0foRQnHzrn/cEw8onhHrvqH92kGRJgDZkWpxHfd8n+b2I4gE2NglkWLgN1ZaxUmqfl+W34YkM1M9NtcaGD90YJiia4s89mu3qZ3PcTwg7uaxlVS5YoTs9PNYrUjt1Pb3PCmiz3hKrqv/mSzp82VcclaVSILT75raV+wnfbhQTFh2TZr/HHhBrU52rjDykfilzPDVxKw+L4SxlMJ2+JNaeoZ6/x6sBcjFLbabC0ic9zj36Tv0XxtQVc2yYECS1YSiG1QMVyH/ahbzkqzdhnkMjM0PREjLv+p4BrPcanBUMytXQfOPopVWCYbsoMa+I5mS56tMSSzpfcj2DxHzZn6Y18rqA5rZjaXe+9/e83iNfhp+Hfenr8O9S1FHK1EpRW8XC3ZkqhODT/tKB4Ou8sUFY0E0TIGV8sP394SVf5f7PBsmwOEImqUpYbTo=',
                     'proof_zero_response': 'HczDlxuIL/2WmZjewAB2n4Ia0FxAH6Ka8ZCJuraSQ3M=',
                     'usage': 'SelectionValue',
-                    },
-                }, {
+                },
+            }, {
                 'ciphertext': {'pad': 'i5PQlfQVvg2D71jov5UKgkECZRi0SUOejblplQI7w9x1Yo8RBk2DEA6tGLqVqdb/6SIAIDU+k0LKMKjHQJ9BweNhF2tvE+Z0ESOWGLqdPAjculalJuvqyBuEJe/lG0XO6e6Hq8hiv3Ydd/LKU8Q8K7dmDjag4f0fbnGPBjiR2WbOHDCCucEKlvMcOXOKD2dWjI41leIA7MO1KuEPzCeWO5v3CkyDD8WtnP0+oEVP4HzgBVhXDsq+rZaRsW0K6qb1p1DW5KQusMl/kWHjtzXG4rJVI3n2FyCz9t2ajSiLEDIcOUNM9xxNg3aY29aDoqf+0LWrHcU+PKyvjU26XXCBcdO/iVZixDfmwf2EVGmCGtsKUs2cJ8mZ/kQYp6y3GG98ScOtXdI0OQuyDRLLQRF/WjgZH+3kYQi3uEcihI23+suIZTJRREj6yuuVtMtoYq5wA2RUiyo2+0iuf8G5zv/knD830H5WNAzJiUJARs9uEBiLVJT230RS8YFQgCUQlVXhqk6hmaVvj/tY8fBlgY0e7R+McWPvCbn4tRLJQRQHy5dQLqk8Mi+22OU5okqeDdkYOP5ZhlV2pvlkeFDyISJvqr9A94+ksaWaGwWwd1hpQQwpUHudQD/sbJxH5CkgTs7qe77D3AWq+Caz8nK1YucZ+hZzoj/1KXxQcMu23L+mXTo=',
                                'data': 'A9dmDAKmhnVZdQ46Sr5ELday3n6M58iUgXlcGIbelVorpr3aLTBDLae/Tim2oqtduJdov1bPkaj92I8EhIVLbaDiL9EQz4SAnsL40+H/9sCGGkiHn5f6XboOFSx+FnScj2Z6jM7R/hBm3QN0ppj23IlFW7L3k8S1InkVJYSoV6rpYdP5n9IrfmkQ0EVSj0F5gXg0is30cHNp4USVNgjv9lMTpDzySjzXbO7Tptp0alRJ/+AqyZJ2uuMlLNqrbmkfUYacMFZvxh5EYfAnZnGsN8SsMWMhQNKJxx2goPbAWOXSiRRtjpTbzxiFkqwfcZw9rbv9ut5gIjuGak13r6NRxDDUlbkP4RH61C4gvC4toy0qLwHofhroG4OPRS43wd5MlBJ2DtdVuJQAB6oAdWTnmqqrWBSRqoTNsYQIiwPYYajB4MhJ/2Me6APqCRHLXZO+K814m1zlwczcSdxnMYEfKO1XYXaE/aMQGxfPqpBP3xGzlujGecJaOsIa7pFmt3k6jvliECpzMT7vt6xrAIWWOOCJatH95XquhOcwtQtYCXZunYtRHAA+QTh4/yy4tR0w0kmpuj9BwptKdYySvXHHhhq/J0RmW6DvQ5lhsX2QvEr2/davORd7Iq+2Lem7TolLlpxchKqcNL+sKW9HRK5FOModUAbg+6IX4tWuVk679aY='
                                },
@@ -183,8 +189,8 @@ def deterministic_encrypted_ballot():
                     'proof_zero_pad': '+S9l9SI2/nUU9y3HmnUdnc2MtzpGrSwYWLPSrr7kDPPq3Get1u1P3ea4cu5qsUoZLjgENTgzlApTxVlcXiHD8HEUg8QHVKgEpk8Q9XvgXpOrLpPyrr4W8PLwXGtlTsWeYP1b5PkXQ6ddZ8ZLld+l/orIePfV/BaLAv7bVHCMP6gceMr3byfA4VUYhOA48ugh9cV+/jr/aOoICQpqB9KNYImL6N0IEFqUVKFnXmS2CG+wdNcbQ+54DdYy4Lz5uiNVpQ3k10hbqm8nm4wJilvPu21RRwqk5VR0Nlk2nAJnqNbHY9MN0noz/1/FDhdykgL7kmRsJO1ex63N8lk4GNXQFmD6jQh8LtRxZyrGKmqJNgHeCpVJLXS01EFtEWZw0gPnNv/cQkM+dNxnpc0evYN8wP2zq8hVe8WRj2qXy10aMwa/RTzajCyiCDS+IfxkC+eBOCexFAXC2jhgmA+nkFHOXHo7n61AuiKuD7WDf0GQ8H0qCVuLG6NpmflFkbALRvX1slQRP968avSXvDsONmYIatlHN8HfWJEsbPjmgHFQYxBmrstyvop/fQoOUJoIeAzleC3OIV1twPK4G2g64zZKLGAip2OMxl9ZSVtjAupStFx70rWRf1/VYz3W3prrT2ZnbT0EYK5T3qZ7w6d0W++86x2HzO8SSVLYA+emZIiIpw==',
                     'proof_zero_response': 'ycGttouI/hGVwSLPru/jm9OidlkEcUN3EZU3o8yZAmI=',
                     'usage': 'SelectionValue',
-                    },
-                }, {
+                },
+            }, {
                 'ciphertext': {'pad': 'mjSzymqbCBh54DloP8Bjq1Epv99H+gcocm96eOO3AH5l6vTZ/XdxvfLvg/IQzlOGuyjyVdCyAbcDpro+r+jgJJiOELy49FQdlENzFBpffWAjBHqseaNbObNjkgDPW/vWf7PjpKzp5QfuAsUB9xtzv12rKvFC9tcYCicYV2n1KwzcoWi/ZQqZUJl4NpJUc6GFpt5AgAMhu0j2dyZfNDvHcXy1o9O+TARs6aK9gKC+PKmTtXV3X0LFq1WlI9oZfwXHra6B93bLANL0v00Jr8kjVDkQ7CSjEyij7QnuhxYhfZpR/29q8ulAMtdcL/YiiRcDGK+V+Rs5eDeFHQWj5k2Hc/5lZ8z8cR8G8BUd4oMzFX9ZGY6kVaJhomMqR3VLO/qDGLEjB9xeNJZLTGk9oSnb80x3ZjWNq6oiOjHLgm3zXCgcsAv42utk8AgB7oJD1p9qxtg1fhI2qzIk6rCH6IxA7Hfnoa5nGnN+VxPxki2vg1shUOPWUiiTYQJR6VSamSJW7wNTttgiS03+7gtfIgsxaNUm2b8aYeJV4zvjh9cjLRwPadMbzaLA2yUl1PuvkahYu/ZKzxjvCv8hAlC7iJVfJmWpnoXjpETkeUVvZxDuf9fgf9UDAz0kVcINl6e49Tb9D1WOr/7bVOpw7vFE+1ixuPmqE8e3/DgiNCIeW6/KweE=',
                                'data': '1CfMLORnhBP4CJmmpmSfJBRGTfLOmblgijgm83yOlvSlrFiCdnuV2WRTka483y7G66a8R4yp9EMm3El95ij+9/WeDXQiLmNXWTQhsyWfOjVAFvMgsQAfCvOVDLbQWnWDZJvp3M5JetSP0ZcR6HEXQNjIXwj1iDxJRS2bXUhAXeGabLWKtxumXxb2un4HQLXH4HWLY1a1GgHgMzX+pzujLJ+jHZ3cpwstWS0XB0SY8h3AdHcyHuDHMPPPTFgGg6wGPBrdxMx9Rg1L2nqnZdLSgWfIjMNeE0+dwBtW/tSIbfpM9erHZCbQ5wj/3vN+adfzDSdGyBLFcyA6YWtpaIhvch6iDrKR6fBYBf2EbgLRY25Rctri0x7OT5Zzqlph3DmA2e7siDSUNhWi99LUNYKfGH5i/h2KwADnkE+kKbEC75rM6yluPN1nDm4/BBK0pruB2K5Us18S4f23TTskJiB9gvi3tc1n2zvJBbcmg887HAoRZ2h8qtGV3iH4RtVAwDNWNO6slicRIU4Ryzjd/UZK1jbj8GtPz3dXT1EN+O2EfbIfwi/WCXHtD7VIxOmyiSbUeLbVZspttS4lAz8pwhP/49sm4oOob9uP8aj8PnZZIBxtTXcxCF8o/E579i20iaU510HX0B8nh/F1juB4y6rUXqAicbQvSlmGijvHcR2BnVQ='
                                },
@@ -204,8 +210,8 @@ def deterministic_encrypted_ballot():
                     'proof_zero_pad': '4DgENqHPxPnlod+aSjaZ0r5yOX6IQpaxxUjUBjphd1uFw4DFRViKjZEt/OKLPP1GSYTVjgNWMd31gAS1AED1XKR2zuemxGuSZJY7lBAa9sxc27uOu9PI2z8fxi+5s5OWHLd0/bmn4OfQUK0MdoGaek2SLLOJ5BDS/0rPy7SooVh4jMOhaeK2jJvzqJXCYIC7RW7GS7tbJw8tD7AJ95+ShRbH+3S+yqf/eMWXAmLofpwvdpl1imnTjhYYL/CDJKZ+shLLH6gVv5YqwXV8cUz5XL9Shg+0pVyWoHuZNjOr6h7dSSAMrRmF8ej2NwkOdW2UyOLMJj6XcTFNg+oiQvTFZ328/UiClHWxrMVHMD3sQy65u61fegxEnWrrrKOYHwUfJIlpf9Z6pauE53SEpx82uGjJkqb+cKyu9gF0Qso5bfM1Mu9IrIXOkfXgQ5gQVALqpt51QYuLVwcGWzhLQmWI8uB6Qyo6A91sz4ZYI7ePrLkpCUNPE+T4yqrqnUCr2+gvIU0kt30BZx/A43OODklnb/4GxN5ZZsE3pW8116Z9T1MvEMULnZ8IRxo/GWsUyh3UtszT+5kaL7zq6BLQhtDDUuCg7y9g1UgKsyRkfe6W5SWOK3dfZp0HEw8gyYS22EPDkrSrmo7PYLkAaKXCTp3sTcUssmrekDe3WHnFvwjWra8=',
                     'proof_zero_response': 'T7bSR+Su46zA8i+rJO4Z6t2HCBBwI+aFE50oTQuN7ig=',
                     'usage': 'SelectionValue',
-                    },
-                }],
+                },
+            }],
             'crypto_hash': 'Ui1oJuxPA9ly9KWopYsT19veG3iaaTCihKHvMKp1Ke8=',
             'description_hash': 'zRhfoa+0QfJYxeAyBST7TF7+ApGlwQUyGifvlT798/0=',
             'object_id': 'question1',
@@ -217,8 +223,8 @@ def deterministic_encrypted_ballot():
                 'pad': 'NS0U97HWsffr1mIEWVt8punLguBdmEn4Pg7O+YmZL6rmGiDufFFfzPWLoU3Hgvc2q5FhlTnCyHEFUtxSnRBIJwY/YCSNC+grtf6z8j8w1GfzABjCN2bKSqbf/PgO3tsIkY0BQQe5NZ0s8Hkkyq4OEj4TxNFyw8E5lCN6tbGTgzBbxpqk/C31sy4MzsWHBFGVA0+pDhLslOjGZDu3AVbV/nhcAA1X4XJ4pBsuGU5e+mAhKTA8agxcx2KAwU+72MpHkCdsw51YqLCSXNY9DgzQFVBe2fVz/5yo6dZPctgK7slqTDj+MMqewazdKf/fM6bGVLFi9ib1wP50TCxbn8YAXKzsRP5mAYHrEAMxUBIIOsU7DUlNDN6A18USKaddpcbxKbAAToMVEvB38glBxl3GsHTJ1OcJw5fWewycmq31vS9Uf5v7E8X8mw0IwZvGg7TQFVPCzWpLbbxX625Rx3Cfjo8Ns0hesdWnKmyBzVoKNzRVHqBji6m5V8APIZP/GQhFeqyR0XWYOGWaJEyMei9Gyiq1W7J9LBwInGnBhXk9O8ChhkyXdbGqEgfoZfDZySy8tGi5S1Ecp7y5YNqYARxrY8XB6SRQTkjqkV1V45qJHRcQAHQB4bTO9RH5IXCPuKVjiK8E3lBW/TpxAMkA0gR+Esw2pHfMAz/z2RQnRTwrDho=',
                 'response': 'JG3UKSYdnxicm62H3o9/0GYGaKkRm0XgGJhKm7ptbQA=',
                 'usage': 'SelectionLimit',
-                },
-            }, {
+            },
+        }, {
             'ballot_selections': [
                 {
                     'ciphertext': {'pad': 'b+n7j3whygYRwVpnSp0Ig4aaKEpxUK0onpFrWwklWkYIw/LrXkD8R4dA26zMI1jduiwYIleQUWGlWvfCmQ3TFTvmN/Wuw46rettq0tGcGqlWx0vLEivlCJCc3KaQ5UhZzF55v94Dv91U3J7BTzJBJAWSyWBz7pV9QKEeG1GilxoohgG8MgKLZGUpuBl9qj0a30fgV5y6oTzsybZkMqR0ZFAcIGY+Kq4AdSWIeBx0DYKXrmF17wvwpTBhaInQgBXSmmsgYLF0K5zCawIIg4EhIJCNIyKO900n9x8NnDPImldanYe0FfEbnS1WVty0TDJA0tnogL2aX9qgghs0JHdmRsJHbThYVf0kWhYJ9Pj8g9Ow2ci5RoYmmshmxPFF8i4IrprM2U15ROw9i0CSFnkQrqgi3NNTVS87ELLQSYty0599SzEp/pJTXuC5CfNIR4+LnvYcE9BV1axZQKeczBlZHQn/WmTm485b6x8+3trWMSbdu5iX4mBoPN+Pr8T6WPC9xDv1dgdeujqd73ycddFNUhW0Bf4+YHtFPTBP5X7Vm0uwaoYRSfLOaJp9jNMVZbyTstlEn2JMBsFYv/Tx83FXMeIFc7DMbEmYwa754MtYmjENPPOAZk3a/fEIURLxcEKl/2vawroL5AmLIeHPGPg/L+KgNyD6d/KpTba93vSRm3g=',
@@ -240,8 +246,8 @@ def deterministic_encrypted_ballot():
                         'proof_zero_pad': 'dAUUof0nro38e+QXVeO/h+s1DiTT6PJTNBcVmAxAMGKJVjePbZoyjW10Usl9N8xQppM/mEE3ppQKBxkiAAmi28/pgKBx99UdbRqFSHutJn/GXBGa1su+UQZb04YmE3uKTWf4oDDKSFove2EtOoQyZw5JiEWODM5600bHLMwMh0Aq2TeOf46PRavJV4etZKyD/aMptgpsGaq2qhtYx9MN8l+RrSDTLWDKe9BcRBa4OI5YS0jYdwQn27DSiO0Qe4xclhXMhJeTxNB1AJyZvTYhFenvY9nGeAoE4SA515Y/ciK+g4Xx2sIdMtOLaih7KcT/NvLZ7sRad1cRZ2mEHH5Xxe0/X9UcT64gzZ3kjSk+OGFbvr+itgh994yRNOLX1AJmI8wWqOrhcbfyHqaeSguyv/rPzbb9QeIvNoUrBDCsRCP238p7aqhlvN4dt3ULhE7smOpbdj/YukOq8+IbIGXQHiAlEW/TMTzBgZzdzU2NUY5ymFk1+lTQrC1MwJXLk+PrxRrjdEY4ediS1vYQMKnvLYNv/axfQ7lx1oFE7yj6WCrgUifbr1WTn2MFkFa6+3AF6GDY8p8pE+On67BwjIhVzkLWZ7foHsgRuUj351Q9bcRoMGAMCYLW5xVw0w2UOOc/Ov4HHJBsa+RBKiX2+hZYADFCDjGJFX9tjSOi3CSAPXk=',
                         'proof_zero_response': '9G9RDgtp9HUEhhAPXYiINZpjd2J1q8Lkkr5ESa7P980=',
                         'usage': 'SelectionValue',
-                        },
                     },
+                },
                 {
                     'ciphertext': {'pad': 'svYMkYbRm8BYD6ai4xFRs+D4A9lVZFXus5UCFXWUBB4yn7VB56trI0Jkyxb4t01vPBNqnKK/+OzLnxwgqpqVvQDPqR8O3LTWAycmKy0qsRSMeskwjg8DvEbJg4UsOJCC0AhNQZNkxA3D0hV8K8vQO0Y4aCXVvNM+eupb/zqYJpAIRc6RVWCsVY1hnBCaLMif6x0MUg1kdmP2MzQ1RLMrgt7OjUsFZuVua6unedjbwijkXHIU+uVAL+FKMZVj96PEo6TB/1kYE1U48YqWc787TcDN9ew2HN9H2QR7qfOIOEPmoEnjeieJnN/0203KGoAZDVdWMsIO2PWDo6uPDUevqOnR/q23MdI/0q5g2OBDW3mGY4wSuSWJ+K468bPuPVrSHqxrgoQKx1vZWUKkEIVHwu93nkLKmx7bw6UI5A5xGvVam5q26L6ypq5ZzEUoEiLToTVUdnN44j8/q8WCYZB2pPupBUEgLCmmF9kBBw9Cezx0NnrXY/8D3zsKeFoXZq7pg9v4MhwRlQf4LZ18wM9wMR9/w5L0dij5zNJvoD7j8eCq7m2ES7fmawP8WI2Wx1s7AZDyb6KtVOelmhNc17AL4lavWxav1sH3jF7qRZu/p98tMfh3Dhtx1c7qPQq8q482vXXVzy+XGM4JOabRQ9DeQg4+ky/H868WFBk2Tf3si+s=',
                                    'data': '2jEICcaRfZKQcLg0oLT9v/MG1qPKlDYtdJig6qs/XhFaZcFoHRfnG1eAN3TPi89uxyLblNmqcplE6OEpBDnJALcQrpxfwJl1vfQSaQYSjfQntN+vblVUZbmYb5Em4MUkIGsJC7UGw90ZU2zFhmr4L+ScqQoTEYYcc5nz+FKhixFix8mm3GJMCgV8H3zFAqPzjpCfY5c/V//juXB5Vy5u5b9z+Ha/8MFUfv7Xyb7+EDE53NL0l6uBT7unfu9XP6biUVcZkfodGc5iblSjDCFoz/+FmZHMnOkkOsaP4c+CScNUdpDDyTXAEBgqIt1a6xTyXzpsR4XQ3ui4tBhnb2L/nPFIaRPFJmJXRXE4EaYT6RrVHU4U8LwNBdrNmoMeXltNfOjjZmF5eEXEPTztrPjS/rSJC8V01p++S84q5O+EEBgVXTIFWsyNt5hfdOM7lkqn12NNatSfaXM1AZO1/NGXb3ZRzig9WXzwJAzLMHr0MLCMcphPQDIZKiqQwNbt/fNWL1Ro2gdoJ7JCWIMSp7yzNa29x+wNBqiwXv0a8Exf5Korl6eRwP7fEBRNDX4KnY3Np7YIYRaZm8fpHzksTQYyEjabtm1JqlX0FcJ365NcBdhdBLb9IWkY6V0FFTpd6hkaoii/MV9crEtnzW+Q+JIMdwWxpznWzGuMFJzSJXG1Fv4='
@@ -262,8 +268,8 @@ def deterministic_encrypted_ballot():
                         'proof_zero_pad': 'elTpGZ13UBLzkOhZAk2MvC2vxwZ0neTwF3EY6jlfNEAmki9igv+WOs3/wV6jA4zfyNFcTpHDNyxsgi1d462s50FtqZMqJ+ABHAnhorQTJnfyPPca6kDep5vXcBfzRvaO8sxZOaRYi9b3xEJwYyeAoFb6KGRoFRrC1AJ9Mv5QkrNW+3Zwt+UGhWmfdQAZYOeRpGpWQeBGTM8LEcrhEcLa2sC/XByNuj0Y9v9jaOkntnSO0y4QPEyBGPw3YktVwqMuQdPEjZ0BF8Yrsx6mptg7nOJsKgYZr3NY2fbjDDVtQSHOEQMIEYGLMaS+ujWKKhmTkBHSWtRlchSdsQ/n1d/nQREH3zBEMk0Ox75EfJ0qzv3dk2tJqBvRPGJvECvlXcF+HXQcVOjrxetwI09TcDImIRnSONhAf+RGGaeKBngvR0zMKgCP39wauxJcxlmvgsEVgj/k0woD3jCmfFBXuVLWFD1C+CgdAmWjd8bY/1FFM0awDMF6asjepGcjQg3AhH5KASAScSz5DHCjP+/dyKU51shjXhXTlvA2mVYafejAxIpZgV+ZLl3HrsFnHhOi3t4HebUZpB7g1yNM6koT4hgCoy4Xsv/zAydJE0XnZqFqwOY8TzaYRN/usTrvp4SQqxUM4Kcb8rM3Yy2FGd3rM04n762Ld4nOjqk0PYY2nflx3Rg=',
                         'proof_zero_response': '/bXLY7ncmQNXpo9dD6gdkxfCXNPejWVpPATqyzLCAW8=',
                         'usage': 'SelectionValue',
-                        },
                     },
+                },
                 {
                     'ciphertext': {'pad': '9Do2Ae+O2Ze5iE3dDs6vHr4qHa2Ki112xFX0k5vS4/+g253fHMis9g/7klpfV7ynAQ2B482zWk/0s/LvYUqDA0IGhT4rsG3P44m/lvVGzEv2OiMWJsydvFHv74N3nXhP/1gl96oMcjsbRnAqteGvBazcn+m1SOYTYOB25kDgYtsaZVkg0LsbF5ihlvN5XbuQT7C6l2zrr++jbAoygHhqkXCZUc6pK/hUObPwpNfTOit87mvELXttjCRBWHdnAs+r0jveUXK47UMAI7jkdi/YmuRZMbf3Pz61wpq5rsH5VlNZb9+VR5jr21Z7fM0WapGPDRnkEvajuZgTEIHw6NzFe3YyO7fpBspC6sEy9HfSmFQ2ZQFtMpghxYwkVMqa1ZIO/x6Jnkgz6Zg+cBzK4xe1GewdzNgzyzeDIo8eSVGkkHJNL+A5wn0lmoYyVt55HcYA+MRqgWyQ7zZgGhOiz77zOejCpMhtYaurBvok6XMH/b/W/fQEsMwzOSnE7Sl62Tngp0IRVJ25RqD+xGqGEHlR008F5NaGlX+yT4NW/WPGR1HY1FlII5SMfHqzA7dQq8NdbkAOqMQE1UXu0xigVNsStyhfnOx2cZxZcpPQYlcAw9DER+fb4YJ6Cy/qTVDneuMK3FCvGqGZjcFYZZEOPOt7zT54BcYTygMTN1znh03XAzA=',
                                    'data': '6Fyb6VJzw8xE63TWHfVG2kBypbC7o19c2nubO/Cv7/reqAZOOd0HqKXUFSPcr7SOcPuTFAo20LZigQqU4Ht5JDap57pe0gAdZwgFY5t1/AgiBgj1B9E6Ht0xBYJZ29UQb+h3JPBmvMLyhIWQrbFhx5k0i//G4pLldlT/GMrjOW7DQ6oHpEZp8TFjtwva5CK5B+pSXtIvBUFAS6PNNqp5LaXHJlJfonxMM8xA2KbQKO4zeN4AuU6uV4xOy7YpoHLIr6ijbgsPZAjcXG7lLd66xvRWsaWZ+RT1qkFLJG2NPdIySxHwNQdP9RLKTNCQCINTlNsr/lqa4qW7AsldKcfV+KFU43+PCfgC3l49+8pWxQTERdi5Q+ncOZR1Ej/6MTcGZhAUZ5CPjGSg+qvZRb+aSnwGEg/f2WQGLj1lf30M9PGk1pqKfg37q/z7SzcQw47U7YlIG18Rn6ejaoh1BWwt/ZiBoP73gI9AKZ6z6e/xxSzz0wsEor/P8VqA8q8uTKaX9dOvVYxJpPdv+zAJJcjSdffsTVBSF/bM8ao5SOYYHZoBpicL6rDUBTOR5XpureCyklti/9u9qEfNZjzHb3qKnO9L40jnPO8o4aaQ+v8/+pLq2JMcR167rxTS3sZSuYZ1iNy/xYN4o3qR0haGfNMYC2sb+cy+Rdl2MmD4gKaKd08='
@@ -284,8 +290,8 @@ def deterministic_encrypted_ballot():
                         'proof_zero_pad': 'ueC90gA6L/D6Kz8XMr0Yu9GOckjWTJvyYl5fhYeUmlkCxAi3RTOISvQLyga4G4Hoj2Mdro15SxN780elBTqXmPlVyPkDiuP/E/TAcbCvKTAZbTeK6ULlkPC8z/dVpLRXxi5cAhicbLhRBYXfHQTLaTnrcmvBL8jDw68LxOnqA2GhAPXObLQ/KsgldEBNclBe3b9di8ZmzVTw2ZQy9LmBGk7dNH0iN6ZxxEly36FOsasYZlFF4lC7ka+w/1MnbnsBGHXGVg+JKdkpWwTtx4Do3127aefm6MtDWyJjpPxjhTOIfxk3Vnd6i2sYF3nPnH6/sTxjzLpFDumu3s7zz01koC4rH7bcPKKCVEKVTOTyOrWFg92P1zKhw91Knm9BhJlIpCyf90gxK5GnAIY3KgDMWlKdrGPwN2lf+VMOcdyEbEPZ3jz+EPi6rYxQwUa2wC927oA5tW81ImLB4zWrClNsOPYG2voFjJA/8+HYl/yBv/rjbHni5nzXKYkkekLDVQ45Y5F5ZWU70kC8zQU0yZCDv/k9+khFTinTgIUYmOS1a8OC94sZpvBKVfjPiyeuhDdtzOyfEEokDkioZsJXZ69j25dZ57x9IirWJQvgWl01xeSdfncW29lXsCIQXsUF29pZ/LPX6g9c9rp3B8kfKXjT5Yz/Bo1eHxOGRqC94PcvJWU=',
                         'proof_zero_response': 'siISl+4IPA7kp5TZL7UBAF4ITwUcXP9HUwqOmX6SOpo=',
                         'usage': 'SelectionValue',
-                        },
                     },
+                },
                 {
                     'ciphertext': {'pad': 'kjYzfl4rsBvI2+mDFmcai6j8+E7KilUF7XFnwkDoVKxKMzcerCEGYyeOoMDXUJ3rHVOxOj/Af+c+UmK391ZXBd4pEniE4xZ9sQFsSNYhi4gNlWSgOhqCuppkzxslGY8n2x2InyOgUFXpH36PK5pofQSrlutcuVTjzjrH5gKgoplIhL7qwMRHDK/DO07UMlNC3BZAiVyZ99LYV118Lmg5C5vY/GQ2CWKOl/Sy0Pcc4fBw1Da3vCLXtSEPzcfG/IOFKrFwhXWJF2plYgHbRkbUsCbKDuMUuNgMo2Jwnuh/xAW09T2SxR4eme3KVvDGKVUAciZ+/tZrJ/4o+fxUGhicAbd5Yj2xQJn8V1PDwHtZ5pBWEk0RbQoTCICdha/7yB8BTuohNV3kf/61JfKMgPsW083lzFGDY40UcSZHwryRrcO52+z8xTkxOuG6T+GXeTAgbnX5PzFW4tSZ4/dRmz5iG6mnBSWgz0ZfXEopGRvffrcQVJMdGRo8L7shiuqedolljfAgy1bxeWcgXGt4PW03ZrJCJTqcm93BVy9O36J738C6nszg+McVvSfDeT8vNYt/ebYEgUaMpuTd/FIhr5gIpEYKW8Xu7+2BuTFxokrZAdzKo2gm8FDWL2hBAnVq8y6hW3vGAZc9VT7VCdcMKZpFdKL2Z2/nnmHNk/SR3LVTE7E=',
                                    'data': 'I5w6h7Z6GhI7ECfnaL/h2b2kOx66sOoNe2lrYOUwX2OR3o6p/XdPAf+AkUt4THdTlKHgiRdSjuyNYIoEyxiI2yOj/jSizf5DPzHxD7QDPx1MGMVI3QGxXLijgNDFnj7X1j0lvtx6aBG5hxEsVcGqzugDqgZut4Hn0gbmApriANZDrrF0vnOhxsrSI44mj8G4GCUfhmupkrQPnEISAd865viUyBQA3TQkuqXkQbkPY47BYA/f4BRuiLwnr1ZhO0PkOB4Wto3k0oaSAAGx+uwi8QsGKyQIQMw82lbvlEgkcyAiRsjDO3qcTuwT6vlVqgPOJE0LfjhtsBCv2+nkwfABCP0V5ug/ed6/o2aX2Me+AxiAqN/zb0h7XWFtzGozvP59WeKI5i/IU1/FaIRlOpzow1PgvxorSzPMg9VHJWSSan2NdTim7NKT4mwz2zvhijWlIqCHrln6BVzBM1gXpJ+SfOgdVXkzWLc8gAfKvrtTsZxy8sp9fcMUlwpvZCAS/bMdgyXxtsiLWNLCXSLbTvbgCF9G+Oh6Ze7BRuBanmNElPHVOEZi+L+GsMmwt6WzP+6HlPU0Oin12w6sEakYomf7pj/mfxHxCT1cgiUZEY5qvykXiRgHIs14uP5xicpYsBIQvntHWaCDZT4cu8ZdkPC1kZeylMMhexpP9BFHLHOhPW8='
@@ -306,8 +312,8 @@ def deterministic_encrypted_ballot():
                         'proof_zero_pad': 'R54R3Z2sUxfnjbUfldgvahjygHqUgakWgY6dcIVvKTJRRGNrxUWRd5hoVdAZ8g0pOvNqpTDdGGWXj85C3OgrZi69vipPdN7d8AsBT+t8FnsJ2MgiADXaumMNC9l5B9xZ2lIuU+RW6b4aruSzp1B6YTUkeFusFLCZbSE16V6YMi1WVOJY+tYb3ZmBg6+cUqKs880SKFRHjRReyjDl+bcEy+RQQnUnr4sfJOGmPq4fIqh525KfhPQatKd/v/y6aj+gkBQksg2JyACOHTYA2ojU/njOBR0aHt//7KOIVevMyVn73yvbs5LiJ9kboD6agXmKZBvG45zWIijqjHGzfyA2dpPFxXWD8UQ+qUQzb32u+vU0epAQAh7C/TMqUG3Fygi3eqMoBf3nK6lQUb7jvc1Ftt06pzRFtBpKPDoYHg/QpwoZ1ALS0irSHR0iaObhIDnrav64TaOI09lGmRi1OijQvQ2AsYOO3vfdNkd4L+vGX/nMy+Lz/TBZ83hieZZlw98ey/x2Z8ucKYZN5JIcTbRLiS5WxmxARc9NpSLslc1sEz6xVeg4xWgKmJLnz/TCuiWwFPXQp7oWrOp4cxGz/F2Mz78WVLvdiwwdQ+u2LqHcMYVrGIJB/KCtX9Ly00XGM7frpPbAMxF59vBaxUzSjhMjHijC7hwiHm0SBvINaCaxD54=',
                         'proof_zero_response': 'BmXU3SXcySM8L0KsaykJ0O+6G6uTBQwSknD9wNrYg38=',
                         'usage': 'SelectionValue',
-                        },
                     },
+                },
                 {
                     'ciphertext': {'pad': 'lgGe5LO8hcuvzWjSN+SAhU0hqI5oeulObnLUHHOzFux8tab70+3Eb2zj2aD2d3+hcE0nQcJUrPLF9udQb45QLbjQTCCSFr93UMHXNf4P9fJWKVFt5T5I5KtAnoBZ48nHf4vFD0UedPZpbJ2UwMstUBvRY8xKv4l/Nyi4W4eivrYdcZr1fKxtkXA38ZQ9tiJ8813/rsS6pak7Gf6VodZaAFIwexIEf9ziyQwk+3yYjz0cXbOa4SBkx6djmfchgOWoMdYIsOMIKi++SQaiaYkhypH2gklA+EcMh1OYcNNUYBfu4+65OAuM3sEVof7/2awI2ug63GMQn9X9I/IesZV/05YwUcMqhCSU3khynXfvrhAuozEmxYAkqKgl0eQiZ9n+AQyP2U6ajPmbZQtAggnqS/3/FNI2azQJKqoUcA5Ttabveie8TeQS0Z7PC7gIzapj2RghHV8ucTH6NH1sdYSmmIThwBa1D7GpUOO0LNeIZp7YjkkreBeS6wMSLwiT80P33PbaSNfaYDzyAEH25e0ZiWpheMEnWGD5F5lEAV38sKoNCGso65ydlgHIKZKqQbw8jZejaXFqDVAzu+AfaqnIn3dUShIbYkvmURi7tke5FijsvHDEBZeREj0OqJSlKHhwrk9w45tL5KcGisLMVp+qv8PsW6DbcRVuvpqCTO/ksj4=',
                                    'data': 'tFNfxcdK175eiVndd6yg9lDKPKmshf9xD0Uh8stUkRG2anPiRTiCPhZ93fGe2Ym4Hksv7Ck46VCMLmGB114QhkigzucTtayFfWVvNZcddYGBBknp5+cdWbzyLX5SEuxCsfgAIcCWc/jcMChiQ6FoAHq4EFq0RwOsHTCl8gCl2lzcmFg/9O2THuWz8jA9DMfqF4WzmlAsSikbaUmfZ3+W7Vz9loblA3QzYfmqJVMrcC+LNY5twDCdjQcD43ik84Bjrt+ZgkljQSBesXmtrJgw2w7rZ1nh5m+pIrGPvoY9neQ0eOeO0wWOWswBu/ttyC6hCNdXJFpEjhPmBlFAYuIDNF7WtVn46cu5IMEafWmP1c7uvyl2NDstghGlGSSOBwXRxH6Is4KxgbHisQp8J+tRsdpWcBJASXDSmDm/JvNF/aM6SC8rh1mtwZKTKaj+1LULQBZpsJ4Qhp7HuuCKPGRHvolSEN3HzojQG2CtJtC9IV2eUAz+8GVqeMidTME9m/+bAsBYvdjrjvooKQO9aCqMHKsyn9ot+VQEweqUX4CdDoGoVjQBr69mSDlyPWpS4WJ1c1m5c9hAJBVia3tjBRMJgrSwvUbNj6ak3qntu8mbBQA4AvErl+Cxe4XFUqG5s036zmiZkJ0tzD6UGnkUiQwJL5BIzmuhFk0YECU6CPRoI5E='
@@ -328,8 +334,8 @@ def deterministic_encrypted_ballot():
                         'proof_zero_pad': 'vLAvqz2KAyhIUrVG2Q5Rfj2lPQJjj3b+nBv0gaEZc9gJnOJjYaqf24DRDTNeXTtFqRMD5tqOdF6yvbBZoH04n1ms/A0wUaUa0JeQAc9qUsfFt4pjGDLow0sSoK6l4JNX8eMzT2uJHs7KCKVMl7lWwVvBqYP65Ps0gW732LjVWss8NIk6EnO7BVKi/gkkyi599Sy4N0bOmrZgREzbt8KKuaCxovhclHkaFxAL5KDJ1MYpFm/94aVtq23BmaIHKWc1fuLIZIH8myHh1lrF0+y9dkR+JXdw2hZUqfkj+0UKEX/LVfapV65tZRJtoqyQJKraY/nKFFepBIs28Cyks/yi2TDJkjhTKCWh1/AmhBoP29kWBmXCh9/2Tl3l2EmWK/T/nEkY6A69eTKGuLLn0unEJbJgZgagHpC83Z6M+1HFaBqWyccNEl0jFOUgxxdjl4A8nGBRUY4+Z927DFLYw/hFKpecjsNlvRZIBwzc6Mb0BjktbZCWla0nFLaJbPN6ZS/c6SeNVx3mQP5xRwc1W4sAVrRPNzlWv63A5eV26Lqh+7ynsP2kmANYER5tcZAO06umZUaFVciuADSuc9QrGSSv2x8chvrJaLGm8z5FKvVOV1yCXRm3KHI/2P/lQhyLraZJVUKL7KYIpxzItrkghsCCH9Q8Nhm8zG4pdKzDMF9FpLM=',
                         'proof_zero_response': 'tMnUV2KRBykDp2TCne6Ok8Xsor2hBWLwq5zCDTMIzfY=',
                         'usage': 'SelectionValue',
-                        },
                     },
+                },
                 {
                     'ciphertext': {'pad': 'GjtbdBC2cwIFPIlwaUb9kqtnkytub5bpBmjvzPX11sIdgNfaBl4XNRX64cA7LjTl/WyyHH/q58IrgIuVueykkpBFI7lwT54fUWf/x7xFWDtbyqGrratsVOPhOxA70jtL8flyYzpFhn4UWGp+GD39T3t0VEAK1Wj+wT+Upq/I/zmMHw4ThSTp0OYFu11zhz0htGFtI7GGJowJvoUyqbjsea8PKcVA5XXeidSGGKLTRZbIKal2rTqRKc3MrewgZdTI1Cs1wXQ/lszO2JjJMMClV4rG4+bmBHb9nBxlMPcQb7cPOb/NdCzEXKGKEZPLU3eZXgPNuK+N+4qD5sy45cqaoq/8+WwerRiY3Yu18QOAnz8ZxvhWBH5wZJE5Kzl8iUY6hMFB6itAHeEYys/QnndhNlrhP1zhg8JU7XSsu5oJcwXi2X4+hyf6vJhdBCiXAKp3o4ZJZ9ul2TABsX/El/kgbhvqBggBdtf8AmN3tO+qBPnFYVtNKafj8o1Y0cFL5VcK/kr29PFQ3IqReR7OTQtvXAFrkO9NMaXzwuCii0PQ7jGWlelou6NiU7vmpKixsJ35XHXoLv1Fswpq1nosyN7hN1DtrSR4vX7OM/z6rhk5h8PgBCVMkTzuuTin4xxF77Lb2AHlsrB0ECruvqFY2dLmMcT6Y7qJggP5vGRQNxBWDbE=',
                                    'data': 'Cho38cd60BAjzPm40UOYfZQ3wWrK1aHuZj55E+X/zgI9AWXIT6Ush7jWfHTwMu49FG3rNBfCi0rRXlOwU7eS5brSP2APLFr8YsnX5TQPipXAE5a/w6ZQQ9qwyZ7FicoprYJPmOuJY3RGZO6r0OxP0zYldo9Owz7KpnDQ/OvsS1GSOfs3J7A01GqR2huWk/kjDBAFTEfE4e0D+OqvT6HcPkWiox9/IFenMArvdHM+Lo/zV1T69cOq1B8CZqzkCSrl0G0Xu5YjYee04RPt/UWZZ2UNkIj2fIhxBEacomvITUGlH5XH4O5bzhYwy58JCo/xfuhv74dnL6iQUCb2HErcsMGtaojYxERDi/tk6ij8VvyLhovFaGTAogeI43Qqgp6U0g79SO/yKWswhqJCnY7E3g8R/iiHGAQ/n/EfOSjwyK3OBiIQ4a3sveZPKSw1F9BrsRHxJidGs7V30g+tKm/O8rPxs7hJrIfLpuk6GvVj1GdA5GbZN3+Z2btRQuB0AZYC/bYsc2HKyqHiFNaWu9eJRkvSv/8Hc/sn5YvQ9//7bEviW1KoYrKQ7FwPo0Q5yTVJ3KKRpllQPIlqp7ez0+sbOyPcjygl6K5gb0Iunamqk1Q59hwqEM2prlHYv8QD4S5vLv+/uE/9lq/soxOXhwEPWhT5JA0mPUhGs29Z1yTuet4='
@@ -350,9 +356,9 @@ def deterministic_encrypted_ballot():
                         'proof_zero_pad': 'ZDylWYszZ1tdz3730ODQqKOXhVAlGFS33hWsX9E46+p9L4U/aJU//coeAr87LRs/Q2H7OQ/lIrl0WLepTB1P5zX7z5/1ME4iczXiFUxFIH17G8fD5dcfgGTGnC/4A8pMJplpVKIl3LCm0PBXrm7QDuTds5Pv6A8mOGeCZvIfdRnXjNSBf7lNKsDJfdEV4O0+oK2qrKLsjcXO/O9WczY/wMgWkJFv4eGkSlkC/7v/nxM+eWRSPa7jg7hA5fuamoul3l2dxdvPJGQjBAZY8uHYdBa1CfVXAGDRF48tit0l9KAsf/nNZYw0PbvjfkzYvIbck/mFHN94q0hycKTaSTCEWJOU35knWAmizCACV7ccojm7vKBxX/E2AoC3HtVdhWMzfWLn6evqLtoK4AFF2beuziwF3ZZbDI8wQdZJ34yG01Kk1PjbpdxPFU/5bz3Pl2NreGPUWQ8IsI4RU7VzR9T8hMSq2nm3iCotTkAhiU3yj7660xepzBH/2oL2IXjmDRlO4+ppQvYwuFvJ326RxKti4PAUk5xyZXwCyNaESRtefo9XuwUHITL/aajW0ppqecKCo2CCrHWJaa1KId45AFFMBExO8pllWLDbRkEDigXsWHh+++BNLiEnKmPLRGZauOglbbCMeQ/EWrHm0EXCLysja2TuNLJENQmLvTBdVQDWPPo=',
                         'proof_zero_response': 'O2K6DIRsXdVHHgKY0bwTgECHnzksB11oPTVY+5RFvL0=',
                         'usage': 'SelectionValue',
-                        },
                     },
-                ],
+                },
+            ],
             'crypto_hash': 'vZLoKCxgoxpKMmLXwnRwBTQOxcQ2VkMUZY/jH1Y2qjg=',
             'description_hash': 'FjU0ZP9rWAcDbmGey14o0LmNJIhOpIMKG66yrJvsMc0=',
             'object_id': 'question2',
@@ -364,16 +370,23 @@ def deterministic_encrypted_ballot():
                 'pad': '5pWkdhEO5iFcSzq0YZbDTn5E8zq1gPJzaA0v44QkJxcx52U0CJ+/bxs0yiBVm9r6a4qYYPzNV6sAuK/f6dNELtv0vKOuqcGX93RHJq93crR/u0hhVPIlLq3OpICTkNpxd2HeQ+rhGIuuN46t0KqB2Ogj8/CSOI1meL+X4yBuN5nEhXmNIfgjvC+owhYwgs3A3NDXXptypMt4MgMfVb40yTt429LSmZ5eOAdzUc7WRCnA5XXyqXbM/apIWBlGjwdO1gJfzuG2kasbOIM//Kls2kWtmuB8m8wJKAu6g4vwFA9PEK16gecqpWms5XVvvXcGGm2hMIh4GB0KkkK23aF7G1HkOH29NrC+mBzJ2tYOUn7VF6EVzCE0Jncctiasd52b2yNocDsrV5BQzKxr+eMeXrKt4wkfUngCaMSsm2YNxRoVDgsbmPTX/0NC06HBc69Vt8CCn0i389/+v54L2S6SSCpelrL6daMfXXDM4K89yyTX78VDaWq6tCSOTmiiGIbA1OPVT4slqg8Y8AOU/VqK7+tsfkBCuUwYviJlesb/pE5Eo9jcBDhHXkx4jpES23xD54vT2zlCOcDckrJZRwgugccz3D1nyvc2SXuKO20UmwYfW0qRRQVN+pFOGWtBLsjWAHE0MV9cvm8fbzUY/KiwmMMqe5D4zl3cmWPzfhN4IyU=',
                 'response': 'WTnLsC8mNSzcx5vIwLrPZIPVBYJmLDc+CMKlfq1KsIQ=',
                 'usage': 'SelectionLimit',
-                },
-            }],
+            },
+        }],
         'crypto_hash': 'KETape8xOHTorN8kTe1J/kW9d9XTYEcBereNyydCuxE=',
         'description_hash': '7dS66G9hBgVu+fIrx61sJDCECgU9UIawwy+RWi8xR9s=',
         'object_id': 'a-voter'
     }
 
 
-def remove_unused(ballot):
-    del ballot['timestamp']
-    del ballot['tracking_hash']
-    del ballot['previous_tracking_hash']
-    return ballot
+def start_tally_message():
+    return {
+        'message_id': 'decidim-barcelona.1.start_tally+a.decidim-barcelona'
+    }
+
+
+def remove_unused(ballot: str):
+    b = serialize_as_dict(deserialize(ballot, CiphertextBallot))
+    del b['timestamp']
+    del b['tracking_hash']
+    del b['previous_tracking_hash']
+    return b
