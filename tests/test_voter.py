@@ -9,7 +9,7 @@ class TestVoter(unittest.TestCase):
 
     def test_cast_vote(self):
         self.voter.process_message('create_election', create_election_test_message())
-        self.voter.process_message('joint_election_key', joint_election_key_test_message())
+        self.voter.process_message('end_key_ceremony', joint_election_key_test_message())
 
         encrypted_ballot = self.voter.encrypt({
             'question1': ['question1-no-selection'],
@@ -27,7 +27,7 @@ class TestVoter(unittest.TestCase):
 
     def test_deterministic(self):
         self.voter.process_message('create_election', create_election_test_message())
-        self.voter.process_message('joint_election_key', joint_election_key_test_message())
+        self.voter.process_message('end_key_ceremony', joint_election_key_test_message())
 
         encrypted_ballot = self.voter.encrypt({
             'question1': ['question1-no-selection'],

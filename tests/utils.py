@@ -126,7 +126,9 @@ def trustees_public_keys():
 
 def joint_election_key_test_message():
     return {
-        'content': serialize({'joint_key': '2UGb92M9jB1sa7AZ+FuwjXtdJ8dxYTyV3Aav21mpWGoHFzvFh8n16RDq+ges84g4kNN0MAzIV+UDvcUQLaEYD1ou7m+hBI+dZ6XgQooK9jSCXodrbl19M/ZEfjspyWzqECGSLuXoqpJtfCkzkEts73EROj3W46oDnlxL/2027pl25f1PmNLW4zhcP6ja4Ld9vUNQmlZwfqscdwDLsGxl/ybJV/46KmtylxY2A4bEcbiy9UZZay+PUsUJWjMx4h7Q45RIL2pB6nA8WtBZ3gYbXR6EVsXmFp+Lv8VuoHpNPF83UxmCGdzkZKKeOBR5oTzGvnhiMy0FAKlHnLFU0PRkdZaTKC07azQvE90ZR1NGcapQ7AFd2h+4xu+s2Wqmx/tHVYo9/Rgvl99mo9LD3qXrsfmH8j2F+KKCGl2PwGimEQE52GZZLx9jIe744Wpp72/FP7py7L9XeJ6soe67/n6sGt/B7qw4HpkhAIstsPPk2mVK1WP2s9CqqJWDh8Ks/LQVp33KvuNzvZ+FwQCfjN1vpNB8NyWL04/oP8BICw2GO0TixlsJoo5dXpLWD4AmAOOC0xD5Qj+tebrGcYl/BkmeUlPxWTn947L5uuThbLh82B3hgW19wHCrMA9E1v+pUtMB+0ioXZnw3okYKgyDxhmVekYdpRdtd9KpXVle+KOFdD0='})
+        'content': serialize({
+            'joint_key': '2UGb92M9jB1sa7AZ+FuwjXtdJ8dxYTyV3Aav21mpWGoHFzvFh8n16RDq+ges84g4kNN0MAzIV+UDvcUQLaEYD1ou7m+hBI+dZ6XgQooK9jSCXodrbl19M/ZEfjspyWzqECGSLuXoqpJtfCkzkEts73EROj3W46oDnlxL/2027pl25f1PmNLW4zhcP6ja4Ld9vUNQmlZwfqscdwDLsGxl/ybJV/46KmtylxY2A4bEcbiy9UZZay+PUsUJWjMx4h7Q45RIL2pB6nA8WtBZ3gYbXR6EVsXmFp+Lv8VuoHpNPF83UxmCGdzkZKKeOBR5oTzGvnhiMy0FAKlHnLFU0PRkdZaTKC07azQvE90ZR1NGcapQ7AFd2h+4xu+s2Wqmx/tHVYo9/Rgvl99mo9LD3qXrsfmH8j2F+KKCGl2PwGimEQE52GZZLx9jIe744Wpp72/FP7py7L9XeJ6soe67/n6sGt/B7qw4HpkhAIstsPPk2mVK1WP2s9CqqJWDh8Ks/LQVp33KvuNzvZ+FwQCfjN1vpNB8NyWL04/oP8BICw2GO0TixlsJoo5dXpLWD4AmAOOC0xD5Qj+tebrGcYl/BkmeUlPxWTn947L5uuThbLh82B3hgW19wHCrMA9E1v+pUtMB+0ioXZnw3okYKgyDxhmVekYdpRdtd9KpXVle+KOFdD0='
+        })
     }
 
 
