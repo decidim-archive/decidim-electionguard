@@ -44,14 +44,14 @@ class ProcessStartKeyCeremony(ElectionStep):
 
     def process_message(self, message_type: Literal['start_key_ceremony'],
                         _message: Content, context: TrusteeContext) -> Tuple[Content, ElectionStep]:
-        return {'message_type': 'trustee_election_keys',
+        return {'message_type': 'key_ceremony.trustee_election_keys',
                 'content': serialize(context.guardian.share_public_keys())}, ProcessTrusteeElectionKeys()
 
 
 class ProcessTrusteeElectionKeys(ElectionStep):
-    message_type = 'trustee_election_keys'
+    message_type = 'key_ceremony.trustee_election_keys'
 
-    def process_message(self, message_type: Literal['trustee_election_keys'],
+    def process_message(self, message_type: Literal['key_ceremony.trustee_election_keys'],
                         message: Content, context: TrusteeContext) -> Tuple[Optional[Content], Optional[ElectionStep]]:
         content = deserialize(message['content'], PublicKeySet)
         if content.owner_id == context.guardian_id:
@@ -63,7 +63,7 @@ class ProcessTrusteeElectionKeys(ElectionStep):
             context.guardian.generate_election_partial_key_backups()
 
             return {
-                'message_type': 'trustee_partial_election_keys',
+                'message_type': 'key_ceremony.trustee_partial_election_keys',
                 'content': serialize(TrusteePartialKeys(
                     guardian_id=context.guardian_id,
                     partial_keys=[
@@ -79,9 +79,9 @@ class ProcessTrusteeElectionKeys(ElectionStep):
 
 
 class ProcessTrusteePartialElectionKeys(ElectionStep):
-    message_type = 'trustee_partial_election_keys'
+    message_type = 'key_ceremony.trustee_partial_election_keys'
 
-    def process_message(self, message_type: Literal['trustee_partial_election_keys'],
+    def process_message(self, message_type: Literal['key_ceremony.trustee_partial_election_keys'],
                         message: Content, context: TrusteeContext) -> Tuple[Optional[Content], Tuple[ElectionStep]]:
         content = deserialize(message['content'], TrusteePartialKeys)
         if content.guardian_id == context.guardian_id:
@@ -97,7 +97,7 @@ class ProcessTrusteePartialElectionKeys(ElectionStep):
             # TODO: check that verifications are OK
 
             return {
-                'message_type': 'trustee_verification',
+                'message_type': 'key_ceremony.trustee_verification',
                 'content': serialize(TrusteeVerification(
                     guardian_id=context.guardian_id,
                     verifications=[
@@ -115,12 +115,12 @@ class ProcessTrusteePartialElectionKeys(ElectionStep):
 class ProcessTrusteeVerification(ElectionStep):
     received_verifications: Set[GUARDIAN_ID]
 
-    message_type = 'trustee_verification'
+    message_type = 'key_ceremony.trustee_verification'
 
     def setup(self):
         self.received_verifications = set()
 
-    def process_message(self, message_type: Literal['trustee_verification'],
+    def process_message(self, message_type: Literal['key_ceremony.trustee_verification'],
                         message: Content, context: TrusteeContext) -> Tuple[None, Optional[ElectionStep]]:
         content = deserialize(message['content'], TrusteeVerification)
         self.received_verifications.add(content.guardian_id)
@@ -150,9 +150,9 @@ class ProcessEndKeyCeremony(ElectionStep):
 
 
 class ProcessTallyCast(ElectionStep):
-    message_type = 'tally_cast'
+    message_type = 'tally.cast'
 
-    def process_message(self, message_type: Literal['tally_cast'],
+    def process_message(self, message_type: Literal['tally.cast'],
                         message: Content, context: TrusteeContext) -> Tuple[Content, None]:
         contests: Dict[CONTEST_ID, CiphertextDecryptionContest] = {}
 
@@ -173,7 +173,7 @@ class ProcessTallyCast(ElectionStep):
             )
 
         return {
-            'message_type': 'trustee_share',
+            'message_type': 'tally.trustee_share',
             'content': serialize(TrusteeShare(
                 guardian_id=context.guardian_id,
                 public_key=context.guardian.share_election_public_key().key,

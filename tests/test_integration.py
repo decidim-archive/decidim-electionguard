@@ -6,8 +6,7 @@ from electionguard.ballot import CiphertextBallot
 from decidim.electionguard.bulletin_board import BulletinBoard
 from decidim.electionguard.trustee import Trustee
 from decidim.electionguard.voter import Voter
-from decidim.electionguard.utils import InvalidBallot, deserialize, serialize
-from decidim.electionguard.messages import JointElectionKey
+from decidim.electionguard.utils import InvalidBallot, serialize
 from .utils import create_election_test_message, start_vote_message, end_vote_message, start_tally_message
 
 
@@ -77,10 +76,10 @@ class TestIntegration(unittest.TestCase):
 
         for public_keys in trustees_public_keys:
             self.bulletin_board.process_message(
-                'trustee_election_keys', public_keys)
+                'key_ceremony.trustee_election_keys', public_keys)
 
         trustees_partial_public_keys = list(filter(None, [
-            trustee.process_message('trustee_election_keys', public_keys)
+            trustee.process_message(public_keys['message_type'], public_keys)
             for public_keys in trustees_public_keys
             for trustee in self.trustees
         ]))
@@ -88,12 +87,10 @@ class TestIntegration(unittest.TestCase):
         self.checkpoint("PUBLIC KEYS", trustees_public_keys)
 
         for partial_public_keys in trustees_partial_public_keys:
-            self.bulletin_board.process_message(
-                'trustee_partial_election_keys', partial_public_keys)
+            self.bulletin_board.process_message(partial_public_keys['message_type'], partial_public_keys)
 
         trustees_verifications = list(filter(None, [
-            trustee.process_message(
-                'trustee_partial_election_keys', partial_public_keys)
+            trustee.process_message(partial_public_keys['message_type'], partial_public_keys)
             for partial_public_keys in trustees_partial_public_keys
             for trustee in self.trustees
         ]))
@@ -101,21 +98,17 @@ class TestIntegration(unittest.TestCase):
         self.checkpoint("PARTIAL PUBLIC KEYS", trustees_partial_public_keys)
 
         for trustee_verifications in trustees_verifications:
-            joint_key = self.bulletin_board.process_message(
-                'trustee_verification', trustee_verifications)
-            if joint_key:
-                self.joint_election_key = deserialize(
-                    joint_key['content'], JointElectionKey).joint_key
+            self.joint_election_key = self.bulletin_board.process_message(
+                trustee_verifications['message_type'], trustee_verifications)
 
         for verification in trustees_verifications:
             for trustee in self.trustees:
-                trustee.process_message('trustee_verification', verification)
+                trustee.process_message(verification['message_type'], verification)
 
         self.checkpoint("VERIFICATIONS", trustees_verifications)
 
         for trustee in self.trustees:
-            trustee.process_message('end_key_ceremony', {
-                                    'content': serialize({'joint_key': self.joint_election_key})})
+            trustee.process_message(self.joint_election_key['message_type'], self.joint_election_key)
 
         self.checkpoint("JOINT ELECTION KEY", self.joint_election_key)
 
@@ -132,8 +125,7 @@ class TestIntegration(unittest.TestCase):
         self.encrypted_ballots: List[CiphertextBallot] = []
         for voter in self.voters:
             voter.process_message('create_election', self.election_message)
-            voter.process_message('end_key_ceremony', {'content': serialize(
-                {'joint_key': self.joint_election_key})})
+            voter.process_message(self.joint_election_key['message_type'], self.joint_election_key)
             voter.process_message('start_vote', start_vote_message())
 
             ballot = dict(
@@ -145,8 +137,7 @@ class TestIntegration(unittest.TestCase):
 
         voter = Voter('a-voter')
         voter.process_message('create_election', self.election_message)
-        voter.process_message('end_key_ceremony', {'content': serialize(
-            {'joint_key': self.joint_election_key})})
+        voter.process_message(self.joint_election_key['message_type'], self.joint_election_key)
         voter.process_message('start_vote', start_vote_message())
         encrypted_ballot = voter.encrypt(ballot, True)
         self.encrypted_ballots.append(encrypted_ballot)
@@ -161,7 +152,7 @@ class TestIntegration(unittest.TestCase):
             voter_id = json.loads(encrypted_ballot)["object_id"]
             try:
                 self.bulletin_board.process_message(
-                    'cast', {'content': encrypted_ballot})
+                    'vote.cast', {'content': encrypted_ballot})
                 self.accepted_ballots.append(encrypted_ballot)
                 self.checkpoint("BALLOT ACCEPTED " + voter_id, encrypted_ballot)
             except InvalidBallot:
@@ -182,16 +173,14 @@ class TestIntegration(unittest.TestCase):
         self.checkpoint("TALLY CAST", tally_cast)
 
         trustees_shares = [
-            trustee.process_message(
-                'tally_cast', {'content': serialize(tally_cast)})
+            trustee.process_message(tally_cast['message_type'], tally_cast)
             for trustee in self.trustees
         ]
 
         self.checkpoint("TRUSTEE SHARES", trustees_shares)
 
         for share in trustees_shares:
-            end_tally = self.bulletin_board.process_message(
-                'trustee_share', share)
+            end_tally = self.bulletin_board.process_message(share['message_type'], share)
 
         self.checkpoint("END TALLY", end_tally)
 
