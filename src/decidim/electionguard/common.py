@@ -25,7 +25,7 @@ class Context:
             raise InvalidElectionDescription()
 
         self.number_of_guardians = len(election_creation['trustees'])
-        self.quorum = election_creation['scheme']['parameters']['quorum']
+        self.quorum = election_creation['scheme']['quorum']
         self.election_builder = ElectionBuilder(
             self.number_of_guardians, self.quorum, self.election)
 
