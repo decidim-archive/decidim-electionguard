@@ -6,7 +6,7 @@ from electionguard.ballot import CiphertextBallot
 from decidim.electionguard.bulletin_board import BulletinBoard
 from decidim.electionguard.trustee import Trustee
 from decidim.electionguard.voter import Voter
-from decidim.electionguard.utils import InvalidBallot, serialize
+from decidim.electionguard.utils import InvalidBallot
 from .utils import create_election_test_message, start_vote_message, end_vote_message, start_tally_message
 
 
