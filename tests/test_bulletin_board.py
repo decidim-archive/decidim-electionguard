@@ -17,11 +17,11 @@ class TestBulletinBoard(unittest.TestCase):
 
         for public_keys in trustees_public_keys():
             self.bulletin_board.process_message(
-                'trustee_election_keys', public_keys)
+                'key_ceremony.trustee_election_keys', public_keys)
 
         for trustee in election_message['trustees']:
             self.bulletin_board.process_message(
-                'trustee_partial_election_keys',
+                'key_ceremony.trustee_partial_election_keys',
                 {'content': serialize(
                     TrusteePartialKeys(guardian_id=trustee['name'], partial_keys=[])
                 )}
@@ -29,7 +29,7 @@ class TestBulletinBoard(unittest.TestCase):
 
         for trustee in election_message['trustees']:
             msg = self.bulletin_board.process_message(
-                'trustee_verification',
+                'key_ceremony.trustee_verification',
                 {'content': serialize(
                     TrusteeVerification(guardian_id=trustee['name'], verifications=[])
                 )}
