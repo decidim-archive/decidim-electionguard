@@ -8,7 +8,7 @@ def create_election_test_message():
     return {
         'scheme': {
             'name': 'electionguard',
-            'parameters': {'quorum': 2}
+            'quorum': 2
         },
         'trustees': [
             {'name': 'alicia', 'public_key': '...'},

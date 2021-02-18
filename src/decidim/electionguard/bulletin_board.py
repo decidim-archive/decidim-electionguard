@@ -43,9 +43,9 @@ class ProcessStartKeyCeremony(ElectionStep):
 
 
 class ProcessTrusteeElectionKeys(ElectionStep):
-    message_type = 'trustee_election_keys'
+    message_type = 'key_ceremony.trustee_election_keys'
 
-    def process_message(self, _message_type: Literal['trustee_election_keys'],
+    def process_message(self, _message_type: Literal['key_ceremony.trustee_election_keys'],
                         message: Content, context: BulletinBoardContext) -> Tuple[None, Optional[ElectionStep]]:
         content = deserialize(message['content'], PublicKeySet)
         guardian_id = content.owner_id
@@ -60,14 +60,14 @@ class ProcessTrusteeElectionKeys(ElectionStep):
 
 
 class ProcessTrusteeElectionPartialKeys(ElectionStep):
-    message_type = 'trustee_partial_election_keys'
+    message_type = 'key_ceremony.trustee_partial_election_keys'
 
     partial_keys_received: Set[GUARDIAN_ID]
 
     def setup(self):
         self.partial_keys_received = set()
 
-    def process_message(self, _message_type: Literal['trustee_partial_election_keys'],
+    def process_message(self, _message_type: Literal['key_ceremony.trustee_partial_election_keys'],
                         message: Content, context: BulletinBoardContext) -> Tuple[None, Optional[ElectionStep]]:
         content = deserialize(message['content'], TrusteePartialKeys)
         self.partial_keys_received.add(content.guardian_id)
@@ -80,31 +80,30 @@ class ProcessTrusteeElectionPartialKeys(ElectionStep):
 
 
 class ProcessTrusteeVerification(ElectionStep):
-    message_type = 'trustee_verification'
+    message_type = 'key_ceremony.trustee_verification'
 
-    verification_received: Set[GUARDIAN_ID]
+    verifications_received: Set[GUARDIAN_ID]
 
     def setup(self):
-        self.verification_received = set()
+        self.verifications_received = set()
 
-    def process_message(self, message_type: Literal['trustee_verification'],
+    def process_message(self, message_type: Literal['key_ceremony.trustee_verification'],
                         message: Content, context: BulletinBoardContext) -> Tuple[Optional[Content], Optional[ElectionStep]]:
         content = deserialize(message['content'], TrusteeVerification)
-        self.verification_received.add(content.guardian_id)
+        self.verifications_received.add(content.guardian_id)
         # TO-DO: check verifications?
 
-        if len(self.verification_received) == context.number_of_guardians:
-            joint_key = elgamal_combine_public_keys(
-                context.public_keys.values())
-            context.election_builder.set_public_key(get_optional(joint_key))
-            context.election_metadata, context.election_context = get_optional(
-                context.election_builder.build()
-            )
-            return {'message_type': 'end_key_ceremony',
-                    'content': serialize(JointElectionKey(joint_key=joint_key))
-                    }, ProcessStartVote()
-        else:
+        if len(self.verifications_received) < context.number_of_guardians:
             return None, None
+
+        joint_key = elgamal_combine_public_keys(context.public_keys.values())
+        context.election_builder.set_public_key(get_optional(joint_key))
+        context.election_metadata, context.election_context = get_optional(
+            context.election_builder.build()
+        )
+        return {'message_type': 'end_key_ceremony',
+                'content': serialize(JointElectionKey(joint_key=joint_key))
+                }, ProcessStartVote()
 
 
 class ProcessStartVote(ElectionStep):
@@ -117,9 +116,9 @@ class ProcessStartVote(ElectionStep):
 
 class ProcessCastVote(ElectionStep):
     def skip_message(self, message_type: str):
-        return message_type != 'cast' and message_type != 'end_vote'
+        return message_type != 'vote.cast' and message_type != 'end_vote'
 
-    def process_message(self, message_type: Literal['cast', 'end_vote'],
+    def process_message(self, message_type: Literal['vote.cast', 'end_vote'],
                         message: Union[Content, dict],
                         context: BulletinBoardContext) -> Union[NoReturn, Tuple[None, Optional[ElectionStep]]]:
         if message_type == 'end_vote':
@@ -143,7 +142,7 @@ class ProcessStartTally(ElectionStep):
 
 
 class ProcessTrusteeShare(ElectionStep):
-    message_type = 'trustee_share'
+    message_type = 'tally.trustee_share'
 
     def process_message(self, message_type: str,
                         message: Content, context: BulletinBoardContext) -> Optional[Content]:
@@ -194,4 +193,4 @@ class BulletinBoard(Wrapper[BulletinBoardContext]):
                                             BallotBoxState.CAST), self.context.tally)
 
     def get_tally_cast(self) -> Dict:
-        return self.context.tally.cast
+        return {'message_type': 'tally.cast', 'content': serialize(self.context.tally.cast)}

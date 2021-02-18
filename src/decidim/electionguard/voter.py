@@ -24,12 +24,19 @@ class ProcessCreateElection(ElectionStep):
 class ProcessEndKeyCeremony(ElectionStep):
     message_type = 'end_key_ceremony'
 
-    def process_message(self, message_type: str, message: Content, context: VoterContext) -> Tuple[None, None]:
+    def process_message(self, message_type: str, message: Content, context: VoterContext) -> Tuple[None, ElectionStep]:
         context.joint_key = deserialize(message['content'], JointElectionKey).joint_key
         context.election_builder.set_public_key(
             get_optional(context.joint_key))
         context.election_metadata, context.election_context = get_optional(
             context.election_builder.build())
+        return None, ProcessStartVote()
+
+
+class ProcessStartVote(ElectionStep):
+    message_type = 'start_vote'
+
+    def process_message(self, message_type: str, message: Content, context: VoterContext) -> Tuple[None, None]:
         return None, None
 
 

@@ -29,7 +29,7 @@ class TestTrustee(unittest.TestCase):
         print('---- END PUBLIC KEYS ----\n')
 
         trustees_partial_public_keys = list(filter(None, [
-            trustee.process_message('trustee_election_keys', public_keys)
+            trustee.process_message('key_ceremony.trustee_election_keys', public_keys)
             for public_keys in trustees_public_keys
             for trustee in self.trustees
         ]))
@@ -40,7 +40,7 @@ class TestTrustee(unittest.TestCase):
 
         trustees_verifications = list(filter(None, [
             trustee.process_message(
-                'trustee_partial_election_keys', partial_public_keys)
+                'key_ceremony.trustee_partial_election_keys', partial_public_keys)
             for partial_public_keys in trustees_partial_public_keys
             for trustee in self.trustees
         ]))
@@ -52,7 +52,7 @@ class TestTrustee(unittest.TestCase):
         # Process verifications results
         for verification in trustees_verifications:
             for trustee in self.trustees:
-                trustee.process_message('trustee_verification', verification)
+                trustee.process_message('key_ceremony.trustee_verification', verification)
 
         # Simulate the message from the Bulletin Board
         end_key_ceremony: Content = {'content': serialize({

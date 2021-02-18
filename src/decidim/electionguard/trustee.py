@@ -29,8 +29,7 @@ class ProcessCreateElection(ElectionStep):
                         message: dict, context: TrusteeContext) -> Tuple[None, ElectionStep]:
         context.build_election(message)
 
-        guardian_ids: List[GUARDIAN_ID] = [trustee['name']
-                                           for trustee in message['trustees']]
+        guardian_ids: List[GUARDIAN_ID] = [trustee['name'] for trustee in message['trustees']]
         context.guardian_ids = set(guardian_ids)
         order = guardian_ids.index(context.guardian_id)
         context.guardian = Guardian(
@@ -44,83 +43,85 @@ class ProcessStartKeyCeremony(ElectionStep):
 
     def process_message(self, message_type: Literal['start_key_ceremony'],
                         _message: Content, context: TrusteeContext) -> Tuple[Content, ElectionStep]:
-        return {'message_type': 'trustee_election_keys',
+        return {'message_type': 'key_ceremony.trustee_election_keys',
                 'content': serialize(context.guardian.share_public_keys())}, ProcessTrusteeElectionKeys()
 
 
 class ProcessTrusteeElectionKeys(ElectionStep):
-    message_type = 'trustee_election_keys'
+    message_type = 'key_ceremony.trustee_election_keys'
+    mine_received: bool = False
 
-    def process_message(self, message_type: Literal['trustee_election_keys'],
+    def process_message(self, message_type: Literal['key_ceremony.trustee_election_keys'],
                         message: Content, context: TrusteeContext) -> Tuple[Optional[Content], Optional[ElectionStep]]:
         content = deserialize(message['content'], PublicKeySet)
+
         if content.owner_id == context.guardian_id:
-            return None, None
-
-        context.guardian.save_guardian_public_keys(content)
-
-        if context.guardian.all_public_keys_received():
-            context.guardian.generate_election_partial_key_backups()
-
-            return {
-                'message_type': 'trustee_partial_election_keys',
-                'content': serialize(TrusteePartialKeys(
-                    guardian_id=context.guardian_id,
-                    partial_keys=[
-                        context.guardian.share_election_partial_key_backup(
-                            guardian_id)
-                        for guardian_id in context.guardian_ids
-                        if context.guardian_id != guardian_id
-                    ]
-                ))
-            }, ProcessTrusteePartialElectionKeys()
+            self.mine_received = True
         else:
+            context.guardian.save_guardian_public_keys(content)
+
+        if not self.mine_received or not context.guardian.all_public_keys_received():
             return None, None
+
+        context.guardian.generate_election_partial_key_backups()
+
+        return {
+            'message_type': 'key_ceremony.trustee_partial_election_keys',
+            'content': serialize(TrusteePartialKeys(
+                guardian_id=context.guardian_id,
+                partial_keys=[
+                    context.guardian.share_election_partial_key_backup(
+                        guardian_id)
+                    for guardian_id in context.guardian_ids
+                    if context.guardian_id != guardian_id
+                ]
+            ))
+        }, ProcessTrusteePartialElectionKeys()
 
 
 class ProcessTrusteePartialElectionKeys(ElectionStep):
-    message_type = 'trustee_partial_election_keys'
+    message_type = 'key_ceremony.trustee_partial_election_keys'
+    mine_received: bool = False
 
-    def process_message(self, message_type: Literal['trustee_partial_election_keys'],
+    def process_message(self, message_type: Literal['key_ceremony.trustee_partial_election_keys'],
                         message: Content, context: TrusteeContext) -> Tuple[Optional[Content], Tuple[ElectionStep]]:
         content = deserialize(message['content'], TrusteePartialKeys)
         if content.guardian_id == context.guardian_id:
-            return None, None
-
-        for partial_keys_backup in content.partial_keys:
-            if partial_keys_backup.designated_id == context.guardian_id:
-                context.guardian.save_election_partial_key_backup(
-                    partial_keys_backup)
-
-        if context.guardian.all_election_partial_key_backups_received():
-
-            # TODO: check that verifications are OK
-
-            return {
-                'message_type': 'trustee_verification',
-                'content': serialize(TrusteeVerification(
-                    guardian_id=context.guardian_id,
-                    verifications=[
-                        context.guardian.verify_election_partial_key_backup(
-                            guardian_id)
-                        for guardian_id in context.guardian_ids
-                        if context.guardian_id != guardian_id
-                    ]
-                ))
-            }, ProcessTrusteeVerification()
+            self.mine_received = True
         else:
+            for partial_keys_backup in content.partial_keys:
+                if partial_keys_backup.designated_id == context.guardian_id:
+                    context.guardian.save_election_partial_key_backup(
+                        partial_keys_backup)
+
+        if not self.mine_received or not context.guardian.all_election_partial_key_backups_received():
             return None, None
+
+        # TODO: check that verifications are OK
+
+        return {
+            'message_type': 'key_ceremony.trustee_verification',
+            'content': serialize(TrusteeVerification(
+                guardian_id=context.guardian_id,
+                verifications=[
+                    context.guardian.verify_election_partial_key_backup(
+                        guardian_id)
+                    for guardian_id in context.guardian_ids
+                    if context.guardian_id != guardian_id
+                ]
+            ))
+        }, ProcessTrusteeVerification()
 
 
 class ProcessTrusteeVerification(ElectionStep):
     received_verifications: Set[GUARDIAN_ID]
 
-    message_type = 'trustee_verification'
+    message_type = 'key_ceremony.trustee_verification'
 
     def setup(self):
         self.received_verifications = set()
 
-    def process_message(self, message_type: Literal['trustee_verification'],
+    def process_message(self, message_type: Literal['key_ceremony.trustee_verification'],
                         message: Content, context: TrusteeContext) -> Tuple[None, Optional[ElectionStep]]:
         content = deserialize(message['content'], TrusteeVerification)
         self.received_verifications.add(content.guardian_id)
@@ -150,9 +151,9 @@ class ProcessEndKeyCeremony(ElectionStep):
 
 
 class ProcessTallyCast(ElectionStep):
-    message_type = 'tally_cast'
+    message_type = 'tally.cast'
 
-    def process_message(self, message_type: Literal['tally_cast'],
+    def process_message(self, message_type: Literal['tally.cast'],
                         message: Content, context: TrusteeContext) -> Tuple[Content, None]:
         contests: Dict[CONTEST_ID, CiphertextDecryptionContest] = {}
 
@@ -173,13 +174,29 @@ class ProcessTallyCast(ElectionStep):
             )
 
         return {
-            'message_type': 'trustee_share',
+            'message_type': 'tally.trustee_share',
             'content': serialize(TrusteeShare(
                 guardian_id=context.guardian_id,
                 public_key=context.guardian.share_election_public_key().key,
                 contests=contests
             ))
-        }, None
+        }, ProcessEndTally()
+
+
+class ProcessEndTally(ElectionStep):
+    message_type = 'end_tally'
+
+    def process_message(self, message_type: Literal['end_tally'],
+                        message: dict, context: TrusteeContext) -> Tuple[None, ElectionStep]:
+        return None, ProcessPublishResults()
+
+
+class ProcessPublishResults(ElectionStep):
+    message_type = 'publish_results'
+
+    def process_message(self, message_type: Literal['publish_results'],
+                        message: dict, context: TrusteeContext) -> Tuple[None, None]:
+        return None, None
 
 
 class Trustee(Wrapper[TrusteeContext]):
@@ -189,7 +206,7 @@ class Trustee(Wrapper[TrusteeContext]):
         super().__init__(TrusteeContext(guardian_id), self.starting_step())
 
     def is_key_ceremony_done(self) -> bool:
-        return self.step.__class__ in [ProcessTallyCast]
+        return self.step.__class__ in [ProcessTallyCast, ProcessEndTally, ProcessPublishResults]
 
     def is_tally_done(self) -> bool:
-        return self.step.__class__ in []  # TODO: implement tally
+        return self.step.__class__ in [ProcessPublishResults]
