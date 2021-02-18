@@ -21,11 +21,6 @@ T = TypeVar("T")
 def deserialize(obj: str, type: Type[T]) -> T:
     return read_json(obj, type)
 
-
-def deserialize_key(obj: str) -> ElementModP:
-    return read_json(obj, ElementModP)
-
-
 class InvalidElectionDescription(Exception):
     '''Exception raised when the election description is invalid.'''
     pass

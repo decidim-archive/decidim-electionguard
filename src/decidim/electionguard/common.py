@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from electionguard.election import CiphertextElectionContext, ElectionDescription, InternalElectionDescription
 from electionguard.election_builder import ElectionBuilder
 from typing import Generic, TypeVar, TypedDict
+import logging as log
 from .utils import complete_election_description, InvalidElectionDescription
 try:
     import cPickle as pickle
@@ -67,7 +68,7 @@ class Wrapper(Generic[C]):
 
     def process_message(self, message_type: str, message: Content) -> Content:
         if self.step.skip_message(message_type):
-            print("WARNING: message of type %s skipped in %s." % (message_type, self.__class__.__name__))
+            log.warning(f"{self.__class__.__name__} skipping message `{message_type}`")
             return
 
         result, next_step = self.step.process_message(
