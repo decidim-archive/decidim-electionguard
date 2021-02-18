@@ -67,6 +67,7 @@ class Wrapper(Generic[C]):
 
     def process_message(self, message_type: str, message: Content) -> Content:
         if self.step.skip_message(message_type):
+            print("WARNING: message of type %s skipped in %s." % (message_type, self.__class__.__name__))
             return
 
         result, next_step = self.step.process_message(
