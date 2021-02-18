@@ -47,21 +47,16 @@ class TestIntegration(unittest.TestCase):
             self.bulletin_board = self.bulletin_board.backup()
             self.trustees = [trustee.backup() for trustee in self.trustees]
             self.bulletin_board = BulletinBoard.restore(self.bulletin_board)
-            self.trustees = [Trustee.restore(trustee)
-                             for trustee in self.trustees]
+            self.trustees = [Trustee.restore(trustee) for trustee in self.trustees]
 
     def configure_election(self):
         self.election_message = create_election_test_message()
         self.bulletin_board = BulletinBoard()
         self.trustees = [Trustee('alicia'), Trustee('bob'), Trustee('clara')]
-        self.voters = [
-            Voter(f'the-voter-{i}')
-            for i in range(1, NUMBER_OF_VOTERS)
-        ]
+        self.voters = [Voter(f'the-voter-{i}') for i in range(1, NUMBER_OF_VOTERS)]
 
     def key_ceremony(self):
-        self.bulletin_board.process_message(
-            'create_election', self.election_message)
+        self.bulletin_board.process_message('create_election', self.election_message)
         self.bulletin_board.process_message('start_key_ceremony', None)
 
         for trustee in self.trustees:
@@ -75,8 +70,7 @@ class TestIntegration(unittest.TestCase):
         self.checkpoint("CREATE ELECTION")
 
         for public_keys in trustees_public_keys:
-            self.bulletin_board.process_message(
-                'key_ceremony.trustee_election_keys', public_keys)
+            self.bulletin_board.process_message(public_keys['message_type'], public_keys)
 
         trustees_partial_public_keys = list(filter(None, [
             trustee.process_message(public_keys['message_type'], public_keys)
@@ -108,7 +102,9 @@ class TestIntegration(unittest.TestCase):
         self.checkpoint("VERIFICATIONS", trustees_verifications)
 
         for trustee in self.trustees:
+            assert(not trustee.is_key_ceremony_done())
             trustee.process_message(self.joint_election_key['message_type'], self.joint_election_key)
+            assert(trustee.is_key_ceremony_done())
 
         self.checkpoint("JOINT ELECTION KEY", self.joint_election_key)
 
@@ -129,8 +125,7 @@ class TestIntegration(unittest.TestCase):
             voter.process_message('start_vote', start_vote_message())
 
             ballot = dict(
-                (contest['object_id'], sample(
-                    contest['selections'], choice(contest['number'])))
+                (contest['object_id'], sample(contest['selections'], choice(contest['number'])))
                 for contest in possible_answers
             )
             self.encrypted_ballots.append(voter.encrypt(ballot))
@@ -151,8 +146,7 @@ class TestIntegration(unittest.TestCase):
         for encrypted_ballot in self.encrypted_ballots:
             voter_id = json.loads(encrypted_ballot)["object_id"]
             try:
-                self.bulletin_board.process_message(
-                    'vote.cast', {'content': encrypted_ballot})
+                self.bulletin_board.process_message('vote.cast', {'content': encrypted_ballot})
                 self.accepted_ballots.append(encrypted_ballot)
                 self.checkpoint("BALLOT ACCEPTED " + voter_id, encrypted_ballot)
             except InvalidBallot:
@@ -183,6 +177,13 @@ class TestIntegration(unittest.TestCase):
             end_tally = self.bulletin_board.process_message(share['message_type'], share)
 
         self.checkpoint("END TALLY", end_tally)
+
+        for trustee in self.trustees:
+            assert(trustee.is_key_ceremony_done())
+            assert(not trustee.is_tally_done())
+            trustee.process_message(end_tally['message_type'], end_tally)
+            assert(trustee.is_key_ceremony_done())
+            assert(trustee.is_tally_done())
 
         if self.show_output:
             for question_id, question in end_tally['results'].items():
