@@ -2,11 +2,16 @@ from dataclasses import dataclass
 import json
 import time
 from pathlib import Path
-from electionguard.election import CiphertextElectionContext, ElectionDescription, InternalElectionDescription
+from electionguard.election import (
+    CiphertextElectionContext,
+    ElectionDescription,
+    InternalElectionDescription,
+)
 from electionguard.election_builder import ElectionBuilder
 from typing import Generic, Optional, TypeVar, TypedDict
 import logging as log
 from .utils import complete_election_description, InvalidElectionDescription
+
 try:
     import cPickle as pickle
 except:  # noqa: E722
@@ -23,18 +28,20 @@ class Context:
 
     def build_election(self, election_creation: dict):
         self.election = ElectionDescription.from_json_object(
-            complete_election_description(election_creation['description']))
+            complete_election_description(election_creation["description"])
+        )
 
         if not self.election.is_valid():
             raise InvalidElectionDescription()
 
-        self.number_of_guardians = len(election_creation['trustees'])
-        self.quorum = election_creation['scheme']['quorum']
+        self.number_of_guardians = len(election_creation["trustees"])
+        self.quorum = election_creation["scheme"]["quorum"]
         self.election_builder = ElectionBuilder(
-            self.number_of_guardians, self.quorum, self.election)
+            self.number_of_guardians, self.quorum, self.election
+        )
 
 
-C = TypeVar('C', bound=Context)
+C = TypeVar("C", bound=Context)
 
 
 @dataclass
@@ -54,26 +61,46 @@ class ElectionStep(Generic[C]):
     def skip_message(self, message_type: str) -> bool:
         return self.message_type != message_type
 
-    def process_message(self, message_type: str, message: Content, context: C) -> Content:
+    def process_message(
+        self, message_type: str, message: Content, context: C
+    ) -> Content:
         raise NotImplementedError()
+
 
 class Recorder:
     def __init__(self, output_path: Path):
         self.output_path = output_path / f"{time.time()}.jsonl"
 
     def __enter__(self):
-        self.file = open(self.output_path, 'w')
+        self.file = open(self.output_path, "w")
         return self
 
-    def __exit__(self ,type, value, traceback):
+    def __exit__(self, type, value, traceback):
         self.file.close()
 
-    def record(self, wrapper_name: str, message_type: str, message: Optional[Content], result: Optional[Content]):
-        json.dump({'wrapper': wrapper_name, 'in': message, 'message_type': message_type, 'out': result}, self.file)
-        self.file.write('\n')
+    def record(
+        self,
+        wrapper_name: str,
+        message_type: str,
+        message: Optional[Content],
+        result: Optional[Content],
+    ):
+        json.dump(
+            {
+                "wrapper": wrapper_name,
+                "in": message,
+                "message_type": message_type,
+                "out": result,
+            },
+            self.file,
+        )
+        self.file.write("\n")
+
 
 class Wrapper(Generic[C]):
-    def __init__(self, context: C, step: ElectionStep[C], recorder: Optional[Recorder] = None) -> None:
+    def __init__(
+        self, context: C, step: ElectionStep[C], recorder: Optional[Recorder] = None
+    ) -> None:
         self.context = context
         self.step = step
         self.recorder = recorder
@@ -87,10 +114,16 @@ class Wrapper(Generic[C]):
             return
 
         result, next_step = self.step.process_message(
-            message_type, message, self.context)
+            message_type, message, self.context
+        )
 
         if self.recorder:
-            self.recorder.record(self.__class__.__name__, message_type=message_type, message=message, result=result)
+            self.recorder.record(
+                self.__class__.__name__,
+                message_type=message_type,
+                message=message,
+                result=result,
+            )
 
         if next_step:
             self.step = next_step

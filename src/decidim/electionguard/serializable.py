@@ -1,5 +1,10 @@
 from base64 import b64encode, b64decode
-from electionguard.group import ElementModP, ElementModQ, int_to_p_unchecked, int_to_q_unchecked
+from electionguard.group import (
+    ElementModP,
+    ElementModQ,
+    int_to_p_unchecked,
+    int_to_q_unchecked,
+)
 from typing import Union, Final
 import electionguard.serializable
 
@@ -11,7 +16,7 @@ def monkey_patch_serialization():
     electionguard.serializable.set_serializers = set_serializers
     electionguard.serializable.set_deserializers = set_deserializers
     # Remove nonces when serializing to JSON
-    electionguard.serializable.KEYS_TO_REMOVE += ['nonce']
+    electionguard.serializable.KEYS_TO_REMOVE += ["nonce"]
 
 
 # patch from https://github.com/microsoft/electionguard-python/pull/154
@@ -58,23 +63,25 @@ def maybe_base64_to_int(i: Union[str, int]) -> int:
 def set_serializers():
     old_set_serializers()
     electionguard.serializable.set_serializer(
-        lambda p, **_: int_to_maybe_base64(p.to_int()), ElementModP)
+        lambda p, **_: int_to_maybe_base64(p.to_int()), ElementModP
+    )
     electionguard.serializable.set_serializer(
-        lambda q, **_: int_to_maybe_base64(q.to_int()), ElementModQ)
+        lambda q, **_: int_to_maybe_base64(q.to_int()), ElementModQ
+    )
     electionguard.serializable.set_serializer(
-        lambda i, **_: int_to_maybe_base64(i), int)
+        lambda i, **_: int_to_maybe_base64(i), int
+    )
 
 
 def set_deserializers():
     old_set_serializers()
     electionguard.serializable.set_deserializer(
-        lambda p, cls, **_: int_to_p_unchecked(
-            maybe_base64_to_int(p)), ElementModP
+        lambda p, cls, **_: int_to_p_unchecked(maybe_base64_to_int(p)), ElementModP
     )
     electionguard.serializable.set_deserializer(
-        lambda q, cls, **_: int_to_q_unchecked(
-            maybe_base64_to_int(q)), ElementModQ
+        lambda q, cls, **_: int_to_q_unchecked(maybe_base64_to_int(q)), ElementModQ
     )
 
     electionguard.serializable.set_deserializer(
-        lambda i, cls, **_: maybe_base64_to_int(i), int)
+        lambda i, cls, **_: maybe_base64_to_int(i), int
+    )

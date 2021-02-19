@@ -12,5 +12,6 @@
     "python.testing.pytestArgs": [
         "tests"
     ],
-    "python.pythonPath": "/root/.local/share/virtualenvs/decidim-electionguard-mrpq2T0u/bin/python"
+    "python.pythonPath": "/root/.local/share/virtualenvs/decidim-electionguard-mrpq2T0u/bin/python",
+    "python.formatting.provider": "black"
 }
