@@ -1,7 +1,10 @@
 from dataclasses import dataclass
 from electionguard.decryption_share import CiphertextDecryptionContest
 from electionguard.group import ElementModP
-from electionguard.key_ceremony import ElectionPartialKeyVerification, ElectionPartialKeyBackup
+from electionguard.key_ceremony import (
+    ElectionPartialKeyVerification,
+    ElectionPartialKeyBackup,
+)
 from electionguard.serializable import Serializable
 from electionguard.types import CONTEST_ID, GUARDIAN_ID
 from typing import Dict, List

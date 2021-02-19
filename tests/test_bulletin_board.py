@@ -11,31 +11,37 @@ class TestBulletinBoard(unittest.TestCase):
 
     def test_key_ceremony(self):
         election_message = create_election_test_message()
-        self.bulletin_board.process_message(
-            'create_election', election_message)
-        self.bulletin_board.process_message('start_key_ceremony', None)
+        self.bulletin_board.process_message("create_election", election_message)
+        self.bulletin_board.process_message("start_key_ceremony", None)
 
         for public_keys in trustees_public_keys():
             self.bulletin_board.process_message(
-                'key_ceremony.trustee_election_keys', public_keys)
+                "key_ceremony.trustee_election_keys", public_keys
+            )
 
-        for trustee in election_message['trustees']:
+        for trustee in election_message["trustees"]:
             self.bulletin_board.process_message(
-                'key_ceremony.trustee_partial_election_keys',
-                {'content': serialize(
-                    TrusteePartialKeys(guardian_id=trustee['name'], partial_keys=[])
-                )}
+                "key_ceremony.trustee_partial_election_keys",
+                {
+                    "content": serialize(
+                        TrusteePartialKeys(guardian_id=trustee["name"], partial_keys=[])
+                    )
+                },
             )
 
-        for trustee in election_message['trustees']:
+        for trustee in election_message["trustees"]:
             msg = self.bulletin_board.process_message(
-                'key_ceremony.trustee_verification',
-                {'content': serialize(
-                    TrusteeVerification(guardian_id=trustee['name'], verifications=[])
-                )}
+                "key_ceremony.trustee_verification",
+                {
+                    "content": serialize(
+                        TrusteeVerification(
+                            guardian_id=trustee["name"], verifications=[]
+                        )
+                    )
+                },
             )
 
-        assert msg['message_type'] == 'end_key_ceremony'
+        assert msg["message_type"] == "end_key_ceremony"
 
         # TODO: assert ballot keys
         # TODO: assert ballot constests keys
@@ -45,5 +51,5 @@ class TestBulletinBoard(unittest.TestCase):
         # TODO: assert decryption of the ballot
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

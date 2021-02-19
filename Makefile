@@ -20,6 +20,9 @@ install-deps:
 	pip install pipenv
 	pipenv install --dev
 
+format:
+	pipenv run black .
+
 lint:
 	pipenv run flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
 	pipenv run flake8 . --count --max-complexity=10 --max-line-length=127 --statistics
