@@ -183,8 +183,8 @@ class ProcessTrusteeShare(ElectionStep):
 
 
 class BulletinBoard(Wrapper[BulletinBoardContext]):
-    def __init__(self) -> None:
-        super().__init__(BulletinBoardContext(), ProcessCreateElection())
+    def __init__(self, recorder=None) -> None:
+        super().__init__(BulletinBoardContext(), ProcessCreateElection(), recorder=recorder)
 
     def add_ballot(self, ballot: dict):
         ciphertext_ballot = deserialize(ballot, CiphertextBallot)

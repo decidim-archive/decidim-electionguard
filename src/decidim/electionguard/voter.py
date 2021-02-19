@@ -43,8 +43,8 @@ class ProcessStartVote(ElectionStep):
 class Voter(Wrapper[VoterContext]):
     ballot_id: str
 
-    def __init__(self, ballot_id: str) -> None:
-        super().__init__(VoterContext(), ProcessCreateElection())
+    def __init__(self, ballot_id: str, recorder = None) -> None:
+        super().__init__(VoterContext(), ProcessCreateElection(), recorder=recorder)
         self.ballot_id = ballot_id
 
     def encrypt(self, ballot: dict, deterministic: bool = False) -> dict:

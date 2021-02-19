@@ -3,6 +3,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+integration_results/
+
 # C extensions
 *.so
 

@@ -1,7 +1,10 @@
 from dataclasses import dataclass
+import json
+import time
+from pathlib import Path
 from electionguard.election import CiphertextElectionContext, ElectionDescription, InternalElectionDescription
 from electionguard.election_builder import ElectionBuilder
-from typing import Generic, TypeVar, TypedDict
+from typing import Generic, Optional, TypeVar, TypedDict
 import logging as log
 from .utils import complete_election_description, InvalidElectionDescription
 try:
@@ -54,14 +57,26 @@ class ElectionStep(Generic[C]):
     def process_message(self, message_type: str, message: Content, context: C) -> Content:
         raise NotImplementedError()
 
+class Recorder:
+    def __init__(self, output_path: Path):
+        self.output_path = output_path / f"{time.time()}.jsonl"
+
+    def __enter__(self):
+        self.file = open(self.output_path, 'w')
+        return self
+
+    def __exit__(self ,type, value, traceback):
+        self.file.close()
+
+    def record(self, wrapper_name: str, message_type: str, message: Optional[Content], result: Optional[Content]):
+        json.dump({'wrapper': wrapper_name, 'in': message, 'message_type': message_type, 'out': result}, self.file)
+        self.file.write('\n')
 
 class Wrapper(Generic[C]):
-    context: C
-    step: ElectionStep[C]
-
-    def __init__(self, context: C, step: ElectionStep[C]) -> None:
+    def __init__(self, context: C, step: ElectionStep[C], recorder: Optional[Recorder] = None) -> None:
         self.context = context
         self.step = step
+        self.recorder = recorder
 
     def skip_message(self, message_type: str) -> bool:
         return self.step.skip_message(message_type)
@@ -73,6 +88,9 @@ class Wrapper(Generic[C]):
 
         result, next_step = self.step.process_message(
             message_type, message, self.context)
+
+        if self.recorder:
+            self.recorder.record(self.__class__.__name__, message_type=message_type, message=message, result=result)
 
         if next_step:
             self.step = next_step

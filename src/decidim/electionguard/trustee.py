@@ -202,8 +202,8 @@ class ProcessPublishResults(ElectionStep):
 class Trustee(Wrapper[TrusteeContext]):
     starting_step = ProcessCreateElection
 
-    def __init__(self, guardian_id: GUARDIAN_ID) -> None:
-        super().__init__(TrusteeContext(guardian_id), self.starting_step())
+    def __init__(self, guardian_id: GUARDIAN_ID, recorder = None) -> None:
+        super().__init__(TrusteeContext(guardian_id), self.starting_step(), recorder=recorder)
 
     def is_key_ceremony_done(self) -> bool:
         return self.step.__class__ in [ProcessTallyCast, ProcessEndTally, ProcessPublishResults]
