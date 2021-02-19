@@ -78,16 +78,17 @@ class Voter(Wrapper[VoterContext]):
 
         # TODO: store the audit information somewhere
 
-        encrypted_ballot = serialize(
-            encrypt_ballot(
-                plaintext_ballot,
-                self.context.election_metadata,
-                self.context.election_context,
-                ElementModQ(0),
-                self.context.joint_key if deterministic else None,
-                True,
-            )
+        encrypted_ballot = encrypt_ballot(
+            plaintext_ballot,
+            self.context.election_metadata,
+            self.context.election_context,
+            ElementModQ(0),
+            self.context.joint_key if deterministic else None,
+            True,
         )
+
+        encrypted_ballot.object_id = self.ballot_id
+
         # TODO: return both auditable and encrypted ballot
 
-        return encrypted_ballot
+        return serialize(encrypted_ballot)
