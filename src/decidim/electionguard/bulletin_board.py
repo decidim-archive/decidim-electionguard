@@ -12,7 +12,6 @@ from electionguard.group import ElementModP
 from electionguard.key_ceremony import PublicKeySet
 from electionguard.tally import (
     CiphertextTally,
-    tally_ballot,
     PlaintextTallyContest,
     PlaintextTallySelection,
 )
@@ -32,6 +31,7 @@ from .utils import (
     serialize_as_dict,
     deserialize,
 )
+from .dummy_scheduler import DummyScheduler
 
 
 class BulletinBoardContext(Context):
@@ -246,10 +246,9 @@ class BulletinBoard(Wrapper[BulletinBoardContext]):
 
     def add_ballot(self, ballot: dict):
         ciphertext_ballot = deserialize(ballot, CiphertextBallot)
-        # TODO: remove the dependency of multiprocessing
-        tally_ballot(
+        self.context.tally.append(
             from_ciphertext_ballot(ciphertext_ballot, BallotBoxState.CAST),
-            self.context.tally,
+            DummyScheduler(),
         )
 
     def get_tally_cast(self) -> Dict:
