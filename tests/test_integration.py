@@ -239,8 +239,8 @@ class TestIntegration(unittest.TestCase):
         if self.show_output:
             for question_id, question in end_tally["results"].items():
                 print(f"Question {question_id}:")
-                for selection_id, selection in question["selections"].items():
-                    print(f"Option {selection_id}: " + str(selection["tally"]))
+                for selection_id, tally in question.items():
+                    print(f"Option {selection_id}: " + str(tally))
 
     def publish_and_verify(self):
         # see publish.py
