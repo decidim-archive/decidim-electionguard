@@ -12,7 +12,6 @@ from electionguard.group import ElementModP
 from electionguard.key_ceremony import PublicKeySet
 from electionguard.tally import (
     CiphertextTally,
-    PlaintextTallyContest,
     PlaintextTallySelection,
 )
 from electionguard.types import CONTEST_ID, GUARDIAN_ID, SELECTION_ID
@@ -26,9 +25,7 @@ from .messages import (
 )
 from .utils import (
     InvalidBallot,
-    pair_with_object_id,
     serialize,
-    serialize_as_dict,
     deserialize,
 )
 from .dummy_scheduler import DummyScheduler
