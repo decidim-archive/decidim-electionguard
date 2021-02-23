@@ -209,23 +209,21 @@ class ProcessTrusteeShare(ElectionStep):
             return None, None
 
         tally_shares = self._prepare_shares_for_decryption(context.shares)
-        results: Dict[CONTEST_ID, PlaintextTallyContest] = {}
+        results: Dict[CONTEST_ID, Dict[SELECTION_ID, int]] = {}
 
         for contest in context.tally.cast.values():
-            selections: Dict[SELECTION_ID, PlaintextTallySelection] = dict(
-                pair_with_object_id(
+            results[contest.object_id] = {}
+            for selection in contest.tally_selections.values():
+                selection_results: PlaintextTallySelection = (
                     decrypt_selection_with_decryption_shares(
                         selection,
                         tally_shares[selection.object_id],
                         context.election_context.crypto_extended_base_hash,
                     )
                 )
-                for selection in contest.tally_selections.values()
-            )
-
-            results[contest.object_id] = serialize_as_dict(
-                PlaintextTallyContest(contest.object_id, selections)
-            )
+                results[contest.object_id][
+                    selection.object_id
+                ] = selection_results.tally
 
         return {"message_type": "end_tally", "results": results}, None
 
