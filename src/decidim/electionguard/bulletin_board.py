@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Dict, NoReturn, Optional, Set, Literal, Union, Tuple
+from typing import Dict, NoReturn, Optional, Set, Literal, Union, Tuple, List
 from electionguard.ballot import (
     CiphertextBallot,
     from_ciphertext_ballot,
@@ -50,9 +50,9 @@ class ProcessCreateElection(ElectionStep):
         message_type: Literal["create_election"],
         message: dict,
         context: BulletinBoardContext,
-    ) -> Tuple[None, ElectionStep]:
+    ) -> Tuple[List[Content], ElectionStep]:
         context.build_election(message)
-        return None, ProcessStartKeyCeremony()
+        return [], ProcessStartKeyCeremony()
 
 
 class ProcessStartKeyCeremony(ElectionStep):
@@ -63,8 +63,8 @@ class ProcessStartKeyCeremony(ElectionStep):
         message_type: Literal["start_key_ceremony"],
         _message: Content,
         context: BulletinBoardContext,
-    ) -> Tuple[None, ElectionStep]:
-        return None, ProcessTrusteeElectionKeys()
+    ) -> Tuple[List[Content], ElectionStep]:
+        return [], ProcessTrusteeElectionKeys()
 
 
 class ProcessTrusteeElectionKeys(ElectionStep):
@@ -75,7 +75,7 @@ class ProcessTrusteeElectionKeys(ElectionStep):
         _message_type: Literal["key_ceremony.trustee_election_keys"],
         message: Content,
         context: BulletinBoardContext,
-    ) -> Tuple[None, Optional[ElectionStep]]:
+    ) -> Tuple[List[Content], Optional[ElectionStep]]:
         content = deserialize(message["content"], PublicKeySet)
         guardian_id = content.owner_id
         guardian_public_key = content.election_public_key
@@ -83,9 +83,9 @@ class ProcessTrusteeElectionKeys(ElectionStep):
         # TO-DO: verify keys?
 
         if len(context.public_keys) == context.number_of_guardians:
-            return None, ProcessTrusteeElectionPartialKeys()
+            return [], ProcessTrusteeElectionPartialKeys()
         else:
-            return None, None
+            return [], None
 
 
 class ProcessTrusteeElectionPartialKeys(ElectionStep):
@@ -101,15 +101,15 @@ class ProcessTrusteeElectionPartialKeys(ElectionStep):
         _message_type: Literal["key_ceremony.trustee_partial_election_keys"],
         message: Content,
         context: BulletinBoardContext,
-    ) -> Tuple[None, Optional[ElectionStep]]:
+    ) -> Tuple[List[Content], Optional[ElectionStep]]:
         content = deserialize(message["content"], TrusteePartialKeys)
         self.partial_keys_received.add(content.guardian_id)
         # TO-DO: verify partial keys?
 
         if len(self.partial_keys_received) == context.number_of_guardians:
-            return None, ProcessTrusteeVerification()
+            return [], ProcessTrusteeVerification()
         else:
-            return None, None
+            return [], None
 
 
 class ProcessTrusteeVerification(ElectionStep):
@@ -125,23 +125,25 @@ class ProcessTrusteeVerification(ElectionStep):
         message_type: Literal["key_ceremony.trustee_verification"],
         message: Content,
         context: BulletinBoardContext,
-    ) -> Tuple[Optional[Content], Optional[ElectionStep]]:
+    ) -> Tuple[List[Content], Optional[ElectionStep]]:
         content = deserialize(message["content"], TrusteeVerification)
         self.verifications_received.add(content.guardian_id)
         # TO-DO: check verifications?
 
         if len(self.verifications_received) < context.number_of_guardians:
-            return None, None
+            return [], None
 
         joint_key = elgamal_combine_public_keys(context.public_keys.values())
         context.election_builder.set_public_key(get_optional(joint_key))
         context.election_metadata, context.election_context = get_optional(
             context.election_builder.build()
         )
-        return {
-            "message_type": "end_key_ceremony",
-            "content": serialize(JointElectionKey(joint_key=joint_key)),
-        }, ProcessStartVote()
+        return [
+            {
+                "message_type": "end_key_ceremony",
+                "content": serialize(JointElectionKey(joint_key=joint_key)),
+            }
+        ], ProcessStartVote()
 
 
 class ProcessStartVote(ElectionStep):
@@ -152,8 +154,8 @@ class ProcessStartVote(ElectionStep):
         message_type: Literal["start_vote"],
         message: dict,
         context: BulletinBoardContext,
-    ) -> Tuple[None, ElectionStep]:
-        return None, ProcessCastVote()
+    ) -> Tuple[List[Content], ElectionStep]:
+        return [], ProcessCastVote()
 
 
 class ProcessCastVote(ElectionStep):
@@ -165,12 +167,12 @@ class ProcessCastVote(ElectionStep):
         message_type: Literal["vote.cast", "end_vote"],
         message: Union[Content, dict],
         context: BulletinBoardContext,
-    ) -> Union[NoReturn, Tuple[None, Optional[ElectionStep]]]:
+    ) -> Union[NoReturn, Tuple[List[Content], Optional[ElectionStep]]]:
         if message_type == "end_vote":
             context.tally = CiphertextTally(
                 "election-results", context.election_metadata, context.election_context
             )
-            return None, ProcessStartTally()
+            return [], ProcessStartTally()
 
         ballot = deserialize(message["content"], CiphertextBallot)
         if not ballot_is_valid_for_election(
@@ -178,7 +180,7 @@ class ProcessCastVote(ElectionStep):
         ):
             raise InvalidBallot()
         else:
-            return None, None
+            return [], None
 
 
 class ProcessStartTally(ElectionStep):
@@ -189,8 +191,8 @@ class ProcessStartTally(ElectionStep):
         message_type: Literal["start_tally"],
         message: Content,
         context: BulletinBoardContext,
-    ) -> Tuple[None, ElectionStep]:
-        return None, ProcessTrusteeShare()
+    ) -> Tuple[List[Content], ElectionStep]:
+        return [], ProcessTrusteeShare()
 
 
 class ProcessTrusteeShare(ElectionStep):
@@ -198,12 +200,12 @@ class ProcessTrusteeShare(ElectionStep):
 
     def process_message(
         self, message_type: str, message: Content, context: BulletinBoardContext
-    ) -> Optional[Content]:
+    ) -> Tuple[List[Content], None]:
         content = deserialize(message["content"], TrusteeShare)
         context.shares[content.guardian_id] = content
 
         if len(context.shares) < context.number_of_guardians:
-            return None, None
+            return [], None
 
         tally_shares = self._prepare_shares_for_decryption(context.shares)
         results: Dict[CONTEST_ID, Dict[SELECTION_ID, int]] = {}
@@ -222,7 +224,7 @@ class ProcessTrusteeShare(ElectionStep):
                     selection.object_id
                 ] = selection_results.tally
 
-        return {"message_type": "end_tally", "results": results}, None
+        return [{"message_type": "end_tally", "results": results}], None
 
     def _prepare_shares_for_decryption(self, tally_shares):
         shares = defaultdict(dict)

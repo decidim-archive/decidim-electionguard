@@ -41,7 +41,7 @@ class TestBulletinBoard(unittest.TestCase):
                 },
             )
 
-        assert msg["message_type"] == "end_key_ceremony"
+        assert msg[0]["message_type"] == "end_key_ceremony"
 
         # TODO: assert ballot keys
         # TODO: assert ballot constests keys
