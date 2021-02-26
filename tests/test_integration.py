@@ -142,6 +142,7 @@ class TestIntegration(unittest.TestCase):
             )
             assert trustee.is_key_ceremony_done()
 
+        self.bulletin_board.process_message("end_key_ceremony", None)
         self.checkpoint("JOINT ELECTION KEY", self.joint_election_key)
 
     def encrypt_ballots(self, recorder=None):
