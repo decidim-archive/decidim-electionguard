@@ -22,9 +22,9 @@ class ProcessCreateElection(ElectionStep):
 
     def process_message(
         self, message_type: str, message: dict, context: VoterContext
-    ) -> Tuple[None, ElectionStep]:
+    ) -> Tuple[List[Content], ElectionStep]:
         context.build_election(message)
-        return None, ProcessEndKeyCeremony()
+        return [], ProcessEndKeyCeremony()
 
 
 class ProcessEndKeyCeremony(ElectionStep):
@@ -32,13 +32,13 @@ class ProcessEndKeyCeremony(ElectionStep):
 
     def process_message(
         self, message_type: str, message: Content, context: VoterContext
-    ) -> Tuple[None, ElectionStep]:
+    ) -> Tuple[List[Content], ElectionStep]:
         context.joint_key = deserialize(message["content"], JointElectionKey).joint_key
         context.election_builder.set_public_key(get_optional(context.joint_key))
         context.election_metadata, context.election_context = get_optional(
             context.election_builder.build()
         )
-        return None, ProcessStartVote()
+        return [], ProcessStartVote()
 
 
 class ProcessStartVote(ElectionStep):
@@ -46,8 +46,8 @@ class ProcessStartVote(ElectionStep):
 
     def process_message(
         self, message_type: str, message: Content, context: VoterContext
-    ) -> Tuple[None, None]:
-        return None, None
+    ) -> Tuple[List[Content], None]:
+        return [], None
 
 
 class Voter(Wrapper[VoterContext]):

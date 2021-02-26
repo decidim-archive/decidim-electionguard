@@ -19,7 +19,7 @@ class TestTrustee(unittest.TestCase):
             trustee.process_message("create_election", create_election_test_message())
 
         trustees_public_keys: List[Content] = [
-            trustee.process_message("start_key_ceremony", None)
+            trustee.process_message("start_key_ceremony", None)[0]
             for trustee in self.trustees
         ]
 
@@ -28,15 +28,18 @@ class TestTrustee(unittest.TestCase):
         print("---- END PUBLIC KEYS ----\n")
 
         trustees_partial_public_keys = list(
-            filter(
-                None,
-                [
-                    trustee.process_message(
-                        "key_ceremony.trustee_election_keys", public_keys
-                    )
-                    for public_keys in trustees_public_keys
-                    for trustee in self.trustees
-                ],
+            map(
+                lambda x: x[0],
+                filter(
+                    None,
+                    [
+                        trustee.process_message(
+                            "key_ceremony.trustee_election_keys", public_keys
+                        )
+                        for public_keys in trustees_public_keys
+                        for trustee in self.trustees
+                    ],
+                ),
             )
         )
 
@@ -45,16 +48,19 @@ class TestTrustee(unittest.TestCase):
         print("---- END PARTIAL PUBLIC KEYS ----\n")
 
         trustees_verifications = list(
-            filter(
-                None,
-                [
-                    trustee.process_message(
-                        "key_ceremony.trustee_partial_election_keys",
-                        partial_public_keys,
-                    )
-                    for partial_public_keys in trustees_partial_public_keys
-                    for trustee in self.trustees
-                ],
+            map(
+                lambda x: x[0],
+                filter(
+                    None,
+                    [
+                        trustee.process_message(
+                            "key_ceremony.trustee_partial_election_keys",
+                            partial_public_keys,
+                        )
+                        for partial_public_keys in trustees_partial_public_keys
+                        for trustee in self.trustees
+                    ],
+                ),
             )
         )
 

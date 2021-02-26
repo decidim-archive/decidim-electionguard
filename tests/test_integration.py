@@ -80,7 +80,7 @@ class TestIntegration(unittest.TestCase):
             trustee.process_message("create_election", self.election_message)
 
         trustees_public_keys = [
-            trustee.process_message("start_key_ceremony", None)
+            trustee.process_message("start_key_ceremony", None)[0]
             for trustee in self.trustees
         ]
 
@@ -92,13 +92,18 @@ class TestIntegration(unittest.TestCase):
             )
 
         trustees_partial_public_keys = list(
-            filter(
-                None,
-                [
-                    trustee.process_message(public_keys["message_type"], public_keys)
-                    for public_keys in trustees_public_keys
-                    for trustee in self.trustees
-                ],
+            map(
+                lambda x: x[0],
+                filter(
+                    None,
+                    [
+                        trustee.process_message(
+                            public_keys["message_type"], public_keys
+                        )
+                        for public_keys in trustees_public_keys
+                        for trustee in self.trustees
+                    ],
+                ),
             )
         )
 
@@ -110,24 +115,29 @@ class TestIntegration(unittest.TestCase):
             )
 
         trustees_verifications = list(
-            filter(
-                None,
-                [
-                    trustee.process_message(
-                        partial_public_keys["message_type"], partial_public_keys
-                    )
-                    for partial_public_keys in trustees_partial_public_keys
-                    for trustee in self.trustees
-                ],
+            map(
+                lambda x: x[0],
+                filter(
+                    None,
+                    [
+                        trustee.process_message(
+                            partial_public_keys["message_type"], partial_public_keys
+                        )
+                        for partial_public_keys in trustees_partial_public_keys
+                        for trustee in self.trustees
+                    ],
+                ),
             )
         )
 
         self.checkpoint("PARTIAL PUBLIC KEYS", trustees_partial_public_keys)
 
         for trustee_verifications in trustees_verifications:
-            self.joint_election_key = self.bulletin_board.process_message(
+            res = self.bulletin_board.process_message(
                 trustee_verifications["message_type"], trustee_verifications
             )
+            if len(res) > 0:
+                self.joint_election_key = res[0]
 
         for verification in trustees_verifications:
             for trustee in self.trustees:
@@ -217,16 +227,16 @@ class TestIntegration(unittest.TestCase):
         self.checkpoint("TALLY CAST", tally_cast)
 
         trustees_shares = [
-            trustee.process_message(tally_cast["message_type"], tally_cast)
+            trustee.process_message(tally_cast["message_type"], tally_cast)[0]
             for trustee in self.trustees
         ]
 
         self.checkpoint("TRUSTEE SHARES", trustees_shares)
 
         for share in trustees_shares:
-            end_tally = self.bulletin_board.process_message(
-                share["message_type"], share
-            )
+            res = self.bulletin_board.process_message(share["message_type"], share)
+            if len(res) > 0:
+                end_tally = res[0]
 
         self.checkpoint("END TALLY", end_tally)
 

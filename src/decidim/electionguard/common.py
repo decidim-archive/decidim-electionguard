@@ -5,10 +5,11 @@ from pathlib import Path
 from electionguard.election import (
     CiphertextElectionContext,
     ElectionDescription,
+    ElectionType,
     InternalElectionDescription,
 )
 from electionguard.election_builder import ElectionBuilder
-from typing import Generic, Optional, TypeVar, TypedDict
+from typing import Generic, List, Optional, Tuple, TypeVar, TypedDict
 import logging as log
 from .utils import complete_election_description, InvalidElectionDescription
 
@@ -63,7 +64,7 @@ class ElectionStep(Generic[C]):
 
     def process_message(
         self, message_type: str, message: Content, context: C
-    ) -> Content:
+    ) -> Tuple[List[Content], Optional[ElectionType]]:
         raise NotImplementedError()
 
 
@@ -113,22 +114,23 @@ class Wrapper(Generic[C]):
             log.warning(f"{self.__class__.__name__} skipping message `{message_type}`")
             return
 
-        result, next_step = self.step.process_message(
+        results, next_step = self.step.process_message(
             message_type, message, self.context
         )
 
         if self.recorder:
-            self.recorder.record(
-                self.__class__.__name__,
-                message_type=message_type,
-                message=message,
-                result=result,
-            )
+            for result in results:
+                self.recorder.record(
+                    self.__class__.__name__,
+                    message_type=message_type,
+                    message=message,
+                    result=result,
+                )
 
         if next_step:
             self.step = next_step
 
-        return result
+        return results
 
     def is_fresh(self) -> bool:
         return isinstance(self.step, self.starting_step)
